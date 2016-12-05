@@ -73,11 +73,12 @@ class delay(object):
 
     def good(self, l, t_c):
         o = [0] * self.num
+        m = []
         for i in self.id:
             a, b, c = self.f(l[i], self.u[i], t_c, self.r[i], self.n[i])
             o[i] = a
-            print 'd', i, b, c
-        return o
+            m.append((i, b, c))
+        return o, m
 
     def gdm(self, d):
         d *= self.T * self.o
@@ -102,8 +103,17 @@ class delay(object):
                 for i in self.id:
                     k_ori[i] += d / s * dfa[i]
                 d = 0
-        o = self.good(k_ori, self.t_c)
-        return o, sum(o) / sum(k_ori)
+        o, m = self.good(k_ori, self.t_c)
+        pr = []
+        for i in o:
+            pr.append(round(i / self.t_c, 4))
+        for i in m:
+            pr.append(round(i[1] / self.t_c, 4))
+            pr.append(round(i[2] / self.t_c, 4))
+        for i in self.u:
+            pr.append(round(i, 4))
+        # c_rate*3, (c_loss_tran, c_loss_time)*3, band,
+        return pr
 
 
 def ran():
@@ -114,12 +124,11 @@ def ran():
 
 
 if __name__ == '__main__':
-    d = delay(3, 0.25)
-    d.set_u([4.8, 6.4, 6.4])
-    d.out()
-    d.con()
-    for i in range(1000):
-        d.set_u([ran(), ran(), ran()])
-        print i, d.gdm(3.0)
+    dd = delay(3, 0.25)
+    dd.out()
+    for ii in range(1000):
+        dd.set_u([ran(), ran(), ran()])
+        dd.con()
+        print ii, ' '.join([str(mm) for mm in dd.gdm(3.0)])
     pass
     # 250*4=1000
