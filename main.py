@@ -3,27 +3,29 @@ import ns.applications as app
 import ns.core as core
 import ns.internet as internet
 import ns.network as network
-import ns.point_to_point
+import ns.point_to_point as p2p
 import ns.mobility as mobility
 import ns.wifi as wifi
+import ns.lte as lte
 
 
 class aaa(network.Application):
-    def __init__(self, soc, i):
+    def __init__(self, soc, index):
         self.socket = soc
-        self.i = i
+        self.i = index
         super(aaa, self).__init__()
 
     def StartApplication(self):
         self.socket.Bind(network.InetSocketAddress(network.Ipv4Address('0.0.0.0'), 9))
-        self.socket.Connect(network.InetSocketAddress(network.Ipv4Address('192.168.0.255'), 9))
+        self.socket.Connect(network.InetSocketAddress(network.Ipv4Address('192.168.0.1'), 9))
         self.socket.SetRecvCallback(self.recv)
         self.socket.SetAllowBroadcast(True)
+        # self.socket.SetIpTtl(1)
         self.send()
         pass
 
     def send(self):
-        a = network.Packet(1472-8-4)
+        a = network.Packet(1472 - 8 - 4)
         he = app.SeqTsHeader()
         he.SetSeq(self.i)
         a.AddHeader(he)
@@ -55,31 +57,38 @@ wifimac = wifi.WifiMacHelper()
 wifimac.SetType("ns3::AdhocWifiMac")
 wifihelper.SetRemoteStationManager("ns3::ConstantRateWifiManager", "DataMode", core.StringValue("OfdmRate54Mbps"))
 
+p2pmac = p2p.PointToPointHelper()
+p2pmac.SetChannelAttribute("Delay", core.TimeValue(core.NanoSeconds(6560)))
+p2pmac.SetDeviceAttribute("DataRate", core.StringValue("2Mbps"))
+
 stas = network.NodeContainer()
 stas.Create(3)
+
+p2ps = network.NodeContainer()
+p2ps.Create(1)
 
 mob = mobility.MobilityHelper()
 mob.Install(stas)
 
 stack = internet.InternetStackHelper()
 stack.Install(stas)
+stack.Install(p2ps)
 
 dev = wifihelper.Install(wifiphy, wifimac, stas)
+p2ps.Add(stas.Get(0))
+dev2 = p2pmac.Install(p2ps)
+
 ip = internet.Ipv4AddressHelper()
 ip.SetBase(network.Ipv4Address('192.168.0.0'), network.Ipv4Mask('255.255.255.0'))
-i = ip.Assign(dev)
+ip.Assign(dev)
+ip.SetBase(network.Ipv4Address('192.168.1.0'), network.Ipv4Mask('255.255.255.0'))
+ip.Assign(dev2)
 
-# cli = app.UdpEchoClientHelper(network.Ipv4Address('192.168.0.255'), 9)
-# cli.SetAttribute("PacketSize", core.UintegerValue(1024))
-# cli.SetAttribute("MaxPackets", core.UintegerValue(1024))
-# cli.SetAttribute("Interval", core.TimeValue(core.Seconds(0.0015)))
-# c1 = cli.Install(stas)
+client = p2ps.Get(0)
+client.AddApplication(aaa(network.Socket.CreateSocket(client, internet.UdpSocketFactory.GetTypeId()), 0))
 for i in range(3):
-    soc = network.Socket.CreateSocket(stas.Get(i), internet.UdpSocketFactory.GetTypeId())
-    cli = aaa(soc, i)
-    stas.Get(i).AddApplication(cli)
-# c1.Start(core.Seconds(.0))
-# c1.Stop(core.Seconds(10.0))
+    client = stas.Get(i)
+    client.AddApplication(aaa(network.Socket.CreateSocket(client, internet.UdpSocketFactory.GetTypeId()), i))
 
 internet.Ipv4GlobalRoutingHelper.PopulateRoutingTables()
 
