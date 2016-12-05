@@ -83,6 +83,7 @@ class delay(object):
     def gdm(self, d):
         d *= self.T * self.o
         k_ori = [d * self.b] * self.num
+        dd = d * self.b
         dfa = [0] * self.num
         s = -1
         while True:
@@ -112,7 +113,10 @@ class delay(object):
             pr.append(round(i[2] / self.t_c, 4))
         for i in self.u:
             pr.append(round(i, 4))
-        # c_rate*3, (c_loss_tran, c_loss_time)*3, band,
+        for i in o:
+            a = (sum(o) - self.num * dd) * 0.8
+            # pr.append(round(a / self.t_c, 4))
+        # c_rate*3 Mbps, (c_loss_tran Mbps, c_loss_time Mbps)*3, band Mbps, w_rate*3 Mbps
         return pr
 
 
