@@ -8,9 +8,9 @@ class delay(object):
         self.num = num
         self.id = range(num)
         self.u = [0] * num
-        self.n = [0.02] * num
+        self.n = [0.01] * num
         self.r = [0.02] * num
-        self.v = 50
+        self.v = 0
         self.T = T
         self.l = 0.0005
         self.TLV = 0.0001
@@ -21,6 +21,7 @@ class delay(object):
 
     def set_u(self, u):
         self.u = u
+        self.v = 50 * random.uniform(0.6, 0.8)
 
     def out(self):
         print 'num', self.num
@@ -63,13 +64,13 @@ class delay(object):
         d2 = 1 + (4 * d * u * t) / d1
         d3 = -(2 * u * t) / (2 * d + u * r)
         d4 = 1 - math.exp(d3) * d2
-        return (1 - n) * d4
+        return (1 - n) * d4 / t * self.l
 
     def f(self, d, u, t, r, n):
         d1 = -(2 * u * t) / (2 * d + u * r)
         d2 = 1 - math.exp(d1)
         d3 = (1 - n) * d2
-        return d * d3, d2 * n, d3 * math.exp(d1)
+        return d * d3, d * n, (1 - n) * d * math.exp(d1)
 
     def good(self, l, t_c):
         o = [0] * self.num
@@ -81,9 +82,10 @@ class delay(object):
         return o, m
 
     def gdm(self, d):
-        d *= self.T * self.o
+        d *= self.t_c
+        dd = d
         k_ori = [d * self.b] * self.num
-        dd = d * self.b
+        d *= self.o
         dfa = [0] * self.num
         s = -1
         while True:
@@ -91,10 +93,8 @@ class delay(object):
                 break
             for i in self.id:
                 dfa[i] = self.df(k_ori[i], self.n[i], self.u[i], self.t_c, self.r[i])
-                if dfa[i] * self.l < self.TLV or dfa[i] * self.l > self.u[i] * (2 * self.t_c - self.r[i]) / 2 - k_ori[
-                    i]:
+                if dfa[i] < self.TLV or dfa[i] > self.u[i] * (2 * self.t_c - self.r[i]) / 2 - k_ori[i]:
                     dfa[i] = 0
-                    continue
             s = sum(dfa)
             if s < d:
                 for i in self.id:
@@ -106,17 +106,18 @@ class delay(object):
                 d = 0
         o, m = self.good(k_ori, self.t_c)
         pr = []
-        for i in o:
-            pr.append(round(i / self.t_c, 4))
-        for i in m:
-            pr.append(round(i[1] / self.t_c, 4))
-            pr.append(round(i[2] / self.t_c, 4))
-        for i in self.u:
-            pr.append(round(i, 4))
-        for i in o:
-            a = (sum(o) - self.num * dd) * 0.8
-            # pr.append(round(a / self.t_c, 4))
-        # c_rate*3 Mbps, (c_loss_tran Mbps, c_loss_time Mbps)*3, band Mbps, w_rate*3 Mbps
+        for i in self.id:
+            pr.append(round(self.u[i], 4))
+            pr.append(round(k_ori[i] / self.t_c, 4))
+            pr.append(round(o[i] / self.t_c, 4))
+            pr.append(round(m[i][1] / self.t_c, 4))
+            pr.append(round(m[i][2] / self.t_c, 4))
+            a = (sum(o) - o[i] - (self.num - 1) * dd * self.b) * random.uniform(0.9, 1)
+            pr.append(round(a / self.t_c, 4))
+            pr.append(round((o[i] + a) / self.t_c, 4))
+            pr.append(round((dd - o[i] - a) / self.t_c, 4))
+            # break
+        # band Mbps, c_rate Mbps, c_good Mbps, c_loss_tran Mbps, c_loss_time Mbps, w_rate Mbps, all Mbps, loss Mbps
         return pr
 
 
@@ -129,10 +130,10 @@ def ran():
 
 if __name__ == '__main__':
     dd = delay(3, 0.25)
-    dd.out()
+    # dd.out()
     for ii in range(1000):
         dd.set_u([ran(), ran(), ran()])
-        dd.con()
-        print ii, ' '.join([str(mm) for mm in dd.gdm(3.0)])
+        dd.seq()
+        print ii, dd.gdm(3.0)
     pass
     # 250*4=1000
