@@ -110,14 +110,14 @@ class Delay(object):
             pr.append(round(self.u[i], 4))
             pr.append(round(k_ori[i] / self.t_c, 4))
             pr.append(round(o[i] / self.t_c, 4))
-            pr.append(round(m[i][1] / self.t_c, 4))
-            pr.append(round(m[i][2] / self.t_c, 4))
+            pr.append(round(m[i][1] / k_ori[i], 4))
+            pr.append(round(m[i][2] / k_ori[i], 4))
             a = (sum(o) - o[i] - (self.num - 1) * d_o * self.b) * random.uniform(0.9, 1)
             pr.append(round(a / self.t_c, 4))
             pr.append(round((o[i] + a) / self.t_c, 4))
-            pr.append(round((d_o - o[i] - a) / self.t_c, 4))
+            pr.append(round((d_o - o[i] - a) / d_o, 4))
             # break
-        # band Mbps, c_rate Mbps, c_good Mbps, c_loss_tran Mbps, c_loss_time Mbps, w_rate Mbps, all Mbps, loss Mbps
+        # band Mbps, c_rate Mbps, c_good Mbps, c_loss_tran, c_loss_time, w_rate Mbps, all Mbps, loss Mbps
         return pr
 
 
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     dd = Delay(3, 0.25)
     for ii in range(1000):
         dd.set_u([ran(), ran(), ran()])
-        dd.seq()
+        dd.con()
         print ii, dd.gdm(3.0)
     pass
     # 250*4=1000
