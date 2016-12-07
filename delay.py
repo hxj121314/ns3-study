@@ -17,14 +17,15 @@ class Delay(object):
         self.b = 0
         self.o = 0
         self.t_c = 0
+        self.t_w = 0
         pass
 
     def set_u(self, u):
         self.u = u
         for i in self.id:
-            self.n[i] = 0.01 * random.uniform(0.5, 2)
-            self.r[i] = 0.02 * random.uniform(1, 2.5)
-        self.v = 50 * random.uniform(0.6, 0.8)
+            self.n[i] = 0.01 * random.uniform(0.5, 1.5)
+            self.r[i] = 0.02 * random.uniform(0.5, 1.5)
+        self.v = 30 * random.uniform(0.6, 0.8)
 
     def con(self):
         m_u = numpy.mean(self.u)
@@ -35,6 +36,7 @@ class Delay(object):
         self.b = b
         self.o = o
         self.t_c = t_c
+        self.t_w = t_w
         return b, o, t_c, t_w
         pass
 
@@ -44,12 +46,13 @@ class Delay(object):
         o = 1.0 * (self.num * self.v) / (self.num * m_u + (self.num - 1) * self.v)
         if b < 0:
             b = 0
-            o = 1
+            o = 1.0
         t_c = self.T / 2
         t_w = self.T / 2
         self.b = b
         self.o = o
         self.t_c = t_c
+        self.t_w = t_w
         return b, o, t_c, t_w
         pass
 
@@ -71,6 +74,15 @@ class Delay(object):
         d2 = 1 - math.exp(d1)
         d3 = (1 - n) * d2
         return d * d3, d * n, (1 - n) * d * math.exp(d1)
+
+    def fwifi(self, d, t):
+        u = self.v
+        n = random.uniform(0.1, 0.2)
+        r = 0.001
+        d1 = -(2 * u * t) / (2 * d + u * r)
+        d2 = 1 - math.exp(d1)
+        d3 = (1 - n) * d2
+        return d * d3
 
     def good(self, l, t_c):
         o = [0] * self.num
@@ -112,11 +124,10 @@ class Delay(object):
             pr.append(round(o[i] / self.t_c, 4))
             pr.append(round(m[i][1] / k_ori[i], 4))
             pr.append(round(m[i][2] / k_ori[i], 4))
-            a = (sum(o) - o[i] - (self.num - 1) * d_o * self.b) * random.uniform(0.9, 1)
+            a = self.fwifi((sum(o) - o[i]) / (self.b + self.o / self.num) * self.o / self.num, self.t_w)
             pr.append(round(a / self.t_c, 4))
             pr.append(round((o[i] + a) / self.t_c, 4))
             pr.append(round((d_o - o[i] - a) / d_o, 4))
-            # break
         # band Mbps, c_rate Mbps, c_good Mbps, c_loss_tran, c_loss_time, w_rate Mbps, all Mbps, loss Mbps
         return pr
 
@@ -132,7 +143,7 @@ if __name__ == '__main__':
     dd = Delay(3, 0.25)
     for ii in range(1000):
         dd.set_u([ran(), ran(), ran()])
-        dd.con()
+        dd.seq()
         print ii, dd.gdm(3.0)
     pass
     # 250*4=1000
