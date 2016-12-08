@@ -62,6 +62,7 @@ class send(network.Application):
 class recv(network.Application):
     def __init__(self, soc):
         self.socket = soc
+        self.past = 0
         super(recv, self).__init__()
 
     def StartApplication(self):
@@ -85,13 +86,15 @@ class recv(network.Application):
             i = he.GetSeq()
             packet.RemoveHeader(he)
             acc = he.GetSeq()
-            print int(core.Simulator.Now().GetSeconds() * 1000 - t), i, acc
+            new = core.Simulator.Now().GetSeconds() * 1000
+            print int(new - t), i, acc
+            self.past = new
 
 
 def install(t, li):
     p2pmac = p2p.PointToPointHelper()
-    p2pmac.SetChannelAttribute("Delay", core.TimeValue(core.Seconds(0.01)))
-    p2pmac.SetDeviceAttribute("DataRate", core.StringValue("8Mbps"))
+    p2pmac.SetChannelAttribute("Delay", core.TimeValue(core.Seconds(0.02)))
+    p2pmac.SetDeviceAttribute("DataRate", core.StringValue("9Mbps"))
 
     stas = network.NodeContainer()
     stas.Create(2)

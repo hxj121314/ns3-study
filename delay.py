@@ -133,20 +133,20 @@ class Delay(object):
         return pr
 
 
-def ran():
-    m = random.uniform(600, 1100)
-    m *= 8.0 / 1024
-    return m
+def ran(devid):
+    m = random.uniform(4, 5)
+    return m * (1 - 0.1 * (devid - 1))
     pass
 
 
 if __name__ == '__main__':
+    dev = 3
     dd = Delay(3, 0.25)
     li = []
     for ii in range(1000):
-        dd.set_u([ran(), ran(), ran(), ran(), ran()])
-        dd.con()
-        gdm = dd.gdm(3.0)
+        dd.set_u([ran(dev), ran(dev), ran(dev), ran(dev), ran(dev)])
+        dd.seq()
+        gdm = dd.gdm(5.0)
         li.append((gdm[1] * 0.25,))
         # print ii, gdm
         # x = random.uniform(52, 48)/8.0
