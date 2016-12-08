@@ -25,7 +25,7 @@ class Delay(object):
         for i in self.id:
             self.n[i] = 0.01 * random.uniform(0.5, 1.5)
             self.r[i] = 0.02 * random.uniform(0.5, 1.5)
-        self.v = 30 * random.uniform(0.6, 0.8)
+        self.v = random.uniform(52, 48)
 
     def con(self):
         m_u = numpy.mean(self.u)
@@ -77,7 +77,7 @@ class Delay(object):
 
     def fwifi(self, d, t):
         u = self.v
-        n = random.uniform(0.1, 0.2)
+        n = random.uniform(0.09, 0.06)
         r = 0.001
         d1 = -(2 * u * t) / (2 * d + u * r)
         d2 = 1 - math.exp(d1)
@@ -145,5 +145,9 @@ if __name__ == '__main__':
         dd.set_u([ran(), ran(), ran()])
         dd.seq()
         print ii, dd.gdm(3.0)
+        # x = random.uniform(52, 48)/8.0
+        # z = x * (1-random.uniform(0.09, 0.06))
+        # y = random.uniform(x, z)
+        # print x, y, z
     pass
     # 250*4=1000
