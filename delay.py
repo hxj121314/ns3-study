@@ -145,15 +145,15 @@ def ran(devid):
 
 if __name__ == '__main__':
     dev = 3
-    dd = Delay(1, 0.25)
+    dd = Delay(4, 0.25)
     li = []
     for ii in range(1000):
         dd.set_u([ran(dev), ran(dev), ran(dev), ran(dev), ran(dev)])
         dd.con()
-        gdm = dd.gdm(5.0)
+        gdm = dd.gdm(3.5)
         li.append((gdm[1] * 0.25, int(dd.base * 1000)))
         print ii, gdm
-        sys.exit(0)
+        # sys.exit(0)
         # x = random.uniform(52, 48)/8.0
         # z = x * (1-random.uniform(0.09, 0.06))
         # y = random.uniform(x, z)
