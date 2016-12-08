@@ -1,6 +1,7 @@
 import numpy
 import math
 import random
+import app
 
 
 class Delay(object):
@@ -141,13 +142,17 @@ def ran():
 
 if __name__ == '__main__':
     dd = Delay(3, 0.25)
+    li = []
     for ii in range(1000):
-        dd.set_u([ran(), ran(), ran()])
-        dd.seq()
-        print ii, dd.gdm(3.0)
+        dd.set_u([ran(), ran(), ran(), ran(), ran()])
+        dd.con()
+        gdm = dd.gdm(3.0)
+        li.append((gdm[1] * 0.25,))
+        # print ii, gdm
         # x = random.uniform(52, 48)/8.0
         # z = x * (1-random.uniform(0.09, 0.06))
         # y = random.uniform(x, z)
         # print x, y, z
+    app.install(0.25, li)
     pass
     # 250*4=1000
