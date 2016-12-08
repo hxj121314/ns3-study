@@ -14,6 +14,7 @@ class send(network.Application):
         self.i = 0
         self.rate = 0
         self.acc = 0
+        self.mtu = 576
         super(send, self).__init__()
         pass
 
@@ -28,7 +29,7 @@ class send(network.Application):
 
     def packet(self):
         self.acc += 1
-        a = network.Packet(1470 - 12 * 3)
+        a = network.Packet(self.mtu - 12 * 3)
         he = app.SeqTsHeader()
         he.SetSeq(self.acc)
         a.AddHeader(he)
@@ -52,7 +53,7 @@ class send(network.Application):
         if self.i >= 1000:
             return
         self.rate = self.list[self.i][0]
-        self.rate = 1470 * 8.0 / self.rate / 1024 / 1024
+        self.rate = self.mtu * 8.0 / self.rate / 1024 / 1024
         for i in range(int(1 / self.rate)):
             a = self.packet()
             self.socket.Send(a)
@@ -98,7 +99,7 @@ class recv(network.Application):
 def install(t, li):
     p2pmac = p2p.PointToPointHelper()
     p2pmac.SetChannelAttribute("Delay", core.TimeValue(core.Seconds(0.02)))
-    p2pmac.SetDeviceAttribute("DataRate", core.StringValue("9Mbps"))
+    p2pmac.SetDeviceAttribute("DataRate", core.StringValue("5.5Mbps"))
 
     stas = network.NodeContainer()
     stas.Create(2)
