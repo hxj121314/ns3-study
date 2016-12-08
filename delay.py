@@ -2,6 +2,7 @@ import numpy
 import math
 import random
 import app
+import sys
 
 
 class Delay(object):
@@ -19,6 +20,7 @@ class Delay(object):
         self.o = 0
         self.t_c = 0
         self.t_w = 0
+        self.base = 0
         pass
 
     def set_u(self, u):
@@ -38,6 +40,7 @@ class Delay(object):
         self.o = o
         self.t_c = t_c
         self.t_w = t_w
+        self.base = 0
         return b, o, t_c, t_w
         pass
 
@@ -54,6 +57,7 @@ class Delay(object):
         self.o = o
         self.t_c = t_c
         self.t_w = t_w
+        self.base = 0
         return b, o, t_c, t_w
         pass
 
@@ -71,16 +75,16 @@ class Delay(object):
         u = self.u[i]
         r = self.r[i]
         n = self.n[i]
-        d1 = -(2 * u * t) / (2 * d + u * r)
-        d2 = 1 - math.exp(d1)
-        d3 = (1 - n) * d2
-        return d * d3, d * n, (1 - n) * d * math.exp(d1)
+        d1 = -(2 * u * t) / (2 * d / 2 + u * r)
+        d2 = math.exp(d1)
+        d3 = (1 - n) * (1 - d2)
+        return d * d3, d * n, (1 - n) * d * d2
 
     def fwifi(self, d, t):
         u = self.v
         n = random.uniform(0.09, 0.06)
         r = 0.001
-        d1 = -(2 * u * t) / (2 * d + u * r)
+        d1 = -(2 * u * t) / (2 * d / 2 + u * r)
         d2 = 1 - math.exp(d1)
         d3 = (1 - n) * d2
         return d * d3
@@ -134,25 +138,26 @@ class Delay(object):
 
 
 def ran(devid):
-    m = random.uniform(4, 5)
+    m = random.uniform(4.8, 8.8)
     return m * (1 - 0.1 * (devid - 1))
     pass
 
 
 if __name__ == '__main__':
     dev = 3
-    dd = Delay(3, 0.25)
+    dd = Delay(1, 0.25)
     li = []
     for ii in range(1000):
         dd.set_u([ran(dev), ran(dev), ran(dev), ran(dev), ran(dev)])
-        dd.seq()
+        dd.con()
         gdm = dd.gdm(5.0)
-        li.append((gdm[1] * 0.25,))
-        # print ii, gdm
+        li.append((gdm[1] * 0.25, int(dd.base * 1000)))
+        print ii, gdm
+        sys.exit(0)
         # x = random.uniform(52, 48)/8.0
         # z = x * (1-random.uniform(0.09, 0.06))
         # y = random.uniform(x, z)
         # print x, y, z
-    app.install(0.25, li)
+    # app.install(0.25, li)
     pass
     # 250*4=1000

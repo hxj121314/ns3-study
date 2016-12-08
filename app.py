@@ -36,6 +36,8 @@ class send(network.Application):
         a.AddHeader(he)
         he.SetSeq(int(core.Simulator.Now().GetSeconds() * 1000))
         a.AddHeader(he)
+        he.SetSeq(self.list[self.i][1])
+        a.AddHeader(he)
         return a
 
     def send(self):
@@ -81,13 +83,15 @@ class recv(network.Application):
             # aa = network.InetSocketAddress.ConvertFrom(a)
             he = app.SeqTsHeader()
             packet.RemoveHeader(he)
+            base = he.GetSeq()
+            packet.RemoveHeader(he)
             t = he.GetSeq()
             packet.RemoveHeader(he)
             i = he.GetSeq()
             packet.RemoveHeader(he)
             acc = he.GetSeq()
             new = core.Simulator.Now().GetSeconds() * 1000
-            print int(new - t), i, acc
+            print int(base + new - t), i, acc
             self.past = new
 
 
