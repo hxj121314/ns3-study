@@ -145,19 +145,25 @@ def ran(devid):
 
 if __name__ == '__main__':
     dev = 3
-    dd = Delay(4, 0.25)
+    iid = 3
+    dd = Delay(iid, 0.25)
     li = []
     for ii in range(1000):
         dd.set_u([ran(dev), ran(dev), ran(dev), ran(dev), ran(dev)])
         dd.con()
         gdm = dd.gdm(3.5)
+        suu = 0
+        for iii in range(iid):
+            suu += gdm[iii * 8 + 6]
+        suu /= iid
         li.append((gdm[1] * 0.25, int(dd.base * 1000)))
-        print ii, gdm
+        # print suu
+        # print ii, gdm
         # sys.exit(0)
         # x = random.uniform(52, 48)/8.0
         # z = x * (1-random.uniform(0.09, 0.06))
         # y = random.uniform(x, z)
         # print x, y, z
-    # app.install(0.25, li)
+    app.install(0.25, li)
     pass
     # 250*4=1000
