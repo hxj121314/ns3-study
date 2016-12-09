@@ -64,19 +64,24 @@ class send(network.Application):
         if self.i >= 1000:
             return
         self.rate = self.list[self.i][2]
-        self.rate = self.mtu * 8.0 / self.rate / 1024 / 1024
+        self.rate = self.mtu * 8.0 / self.rate / 1000000
 
         self.past = int(self.T * self.i * 1000)
 
-        self.task = self.list[self.i][0]
-        self.task = self.mtu * 8.0 / self.rate / 1024 / 1024
-        self.task = int(1000.0 * self.T / self.task)
+        self.task = self.list[self.i][0] * 1000000 / (self.mtu * 8.0)
+        self.task = int(self.task)
 
-        cha = self.task - int(1000.0 * self.T / self.rate)
+        remain = core.Simulator.Now().GetSeconds() - self.past / 1000.0
+        if remain < 0:
+            remain = 0
+        if remain > self.T:
+            remain = self.T
+        cha = self.task - int(1.0 * remain / self.rate)
         if cha > 0:
             for i in range(cha):
                 a = self.packet()
                 self.socket.Send(a)
+            self.task -= cha
         self.i += 1
         # core.Simulator.Schedule(core.Seconds(self.T), self.up)
         core.Simulator.Schedule(core.Seconds(0), self.send)
@@ -126,7 +131,7 @@ class recv(network.Application):
 def install(t, li):
     p2pmac = p2p.PointToPointHelper()
     p2pmac.SetChannelAttribute("Delay", core.TimeValue(core.Seconds(0.01)))
-    p2pmac.SetDeviceAttribute("DataRate", core.StringValue("5.5Mbps"))
+    p2pmac.SetDeviceAttribute("DataRate", core.StringValue("6.8Mbps"))
 
     stas = network.NodeContainer()
     stas.Create(2)

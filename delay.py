@@ -147,8 +147,8 @@ def ran(devid):
 
 if __name__ == '__main__':
     dev = 4
-    iid = 3
-    video = 5.5  # 3.5 4.5 5.5 6.5
+    iid = 4
+    video = 6.5  # 3.5 4.5 5.5 6.5
     dd = Delay(iid, 0.25)
     li = []
     suulist = []
@@ -159,14 +159,14 @@ if __name__ == '__main__':
         # suulist.append(1 - suu / video)
         suulist.append(sum([gdm[iii * 8 + 6] for iii in range(iid)]) / iid)
         li.append((gdm[1] * 0.25, int(dd.base * 1000), gdm[0]))
-        # print suu
         # print ii, gdm
         # sys.exit(0)
         # x = random.uniform(52, 48)/8.0
         # z = x * (1-random.uniform(0.09, 0.06))
         # y = random.uniform(x, z)
         # print x, y, z
-    app.install(0.25, li)
+    # app.install(0.25, li)
     # print numpy.mean(suulist), max(suulist), min(suulist)
+    print '[' + ' '.join([str(iid) for iid in suulist]) + ']'
     pass
     # 250*4=1000
