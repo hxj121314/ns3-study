@@ -15,6 +15,8 @@ class send(network.Application):
         self.rate = 0
         self.acc = 0
         self.mtu = 576
+        self.past = 0
+        self.task = 0
         super(send, self).__init__()
         pass
 
@@ -23,8 +25,8 @@ class send(network.Application):
         self.socket.Connect(network.InetSocketAddress(network.Ipv4Address('192.168.0.2'), 9))
         self.socket.SetAllowBroadcast(True)
         # self.socket.SetIpTtl(1)
-        core.Simulator.Schedule(core.Seconds(0), self.up)
-        # core.Simulator.Schedule(core.Seconds(0), self.send)
+        # core.Simulator.Schedule(core.Seconds(0), self.up)
+        core.Simulator.Schedule(core.Seconds(0), self.send)
         pass
 
     def packet(self):
@@ -35,7 +37,7 @@ class send(network.Application):
         a.AddHeader(he)
         he.SetSeq(self.i)
         a.AddHeader(he)
-        he.SetSeq(int(core.Simulator.Now().GetSeconds() * 1000))
+        he.SetSeq(self.past)
         a.AddHeader(he)
         he.SetSeq(self.list[self.i][1])
         a.AddHeader(he)
@@ -44,20 +46,34 @@ class send(network.Application):
     def send(self):
         if self.i >= 1000:
             return
+        if self.task <= 0:
+            slot = self.T * self.i - core.Simulator.Now().GetSeconds()
+            if slot <= 0:
+                slot = 0
+            core.Simulator.Schedule(core.Seconds(slot), self.up)
+            return
         a = self.packet()
         self.socket.Send(a)
+        self.task -= 1
         core.Simulator.Schedule(core.Seconds(self.rate), self.send)
         pass
 
     def up(self):
         if self.i >= 1000:
             return
-        self.rate = self.list[self.i][0]
+        self.rate = self.list[self.i][2]
         self.rate = self.mtu * 8.0 / self.rate / 1024 / 1024
-        for i in range(int(1 / self.rate)):
-            a = self.packet()
-            self.socket.Send(a)
-        core.Simulator.Schedule(core.Seconds(self.T), self.up)
+        self.past = int(self.T * self.i * 1000)
+        self.task = self.list[self.i][0]
+        self.task = self.mtu * 8.0 / self.rate / 1024 / 1024
+        self.task = int(1000.0 / self.task)
+        cha = self.task - int(1000.0 / self.rate)
+        if cha > 0:
+            for i in range(cha):
+                a = self.packet()
+                self.socket.Send(a)
+        # core.Simulator.Schedule(core.Seconds(self.T), self.up)
+        core.Simulator.Schedule(core.Seconds(0), self.send)
         self.i += 1
         pass
 
@@ -66,6 +82,7 @@ class recv(network.Application):
     def __init__(self, soc):
         self.socket = soc
         self.past = 0
+        self.i = 0
         super(recv, self).__init__()
 
     def StartApplication(self):
@@ -92,7 +109,9 @@ class recv(network.Application):
             packet.RemoveHeader(he)
             acc = he.GetSeq()
             new = core.Simulator.Now().GetSeconds() * 1000
-            print int(base + new - t), i, acc
+            if int(base + new - t) > 250:
+                self.i += 1
+                print self.i, int(base + new - t), i, acc
             self.past = new
 
 
