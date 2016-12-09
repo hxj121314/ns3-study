@@ -40,7 +40,7 @@ class Delay(object):
         self.o = o
         self.t_c = t_c
         self.t_w = t_w
-        self.base = (t_w / 2) * (self.num - 1) / self.num
+        self.base = 0  # (t_w / 2) * (self.num - 1) / self.num
         return b, o, t_c, t_w
         pass
 
@@ -57,7 +57,7 @@ class Delay(object):
         self.o = o
         self.t_c = t_c
         self.t_w = t_w
-        self.base = (t_w / 2) * (self.num - 1) / self.num
+        self.base = (t_c + t_w / 2) * (self.num - 1) / self.num
         return b, o, t_c, t_w
         pass
 
@@ -146,9 +146,9 @@ def ran(devid):
 
 
 if __name__ == '__main__':
-    dev = 3
+    dev = 4
     iid = 3
-    video = 3.0
+    video = 5.5  # 3.5 4.5 5.5 6.5
     dd = Delay(iid, 0.25)
     li = []
     suulist = []
@@ -160,13 +160,13 @@ if __name__ == '__main__':
         suulist.append(sum([gdm[iii * 8 + 6] for iii in range(iid)]) / iid)
         li.append((gdm[1] * 0.25, int(dd.base * 1000), gdm[0]))
         # print suu
-        print ii, gdm
+        # print ii, gdm
         # sys.exit(0)
         # x = random.uniform(52, 48)/8.0
         # z = x * (1-random.uniform(0.09, 0.06))
         # y = random.uniform(x, z)
         # print x, y, z
-    # app.install(0.25, li)
+    app.install(0.25, li)
     # print numpy.mean(suulist), max(suulist), min(suulist)
     pass
     # 250*4=1000

@@ -1,4 +1,5 @@
 import random
+import numpy
 import ns.applications as app
 import ns.core as core
 import ns.internet as internet
@@ -14,7 +15,7 @@ class send(network.Application):
         self.i = 0
         self.rate = 0
         self.acc = 0
-        self.mtu = 576
+        self.mtu = 1472
         self.past = 0
         self.task = 0
         super(send, self).__init__()
@@ -25,8 +26,8 @@ class send(network.Application):
         self.socket.Connect(network.InetSocketAddress(network.Ipv4Address('192.168.0.2'), 9))
         self.socket.SetAllowBroadcast(True)
         # self.socket.SetIpTtl(1)
-        # core.Simulator.Schedule(core.Seconds(0), self.up)
-        core.Simulator.Schedule(core.Seconds(0), self.send)
+        core.Simulator.Schedule(core.Seconds(0), self.up)
+        # core.Simulator.Schedule(core.Seconds(0), self.send)
         pass
 
     def packet(self):
@@ -53,6 +54,7 @@ class send(network.Application):
             core.Simulator.Schedule(core.Seconds(slot), self.up)
             return
         a = self.packet()
+        # if core.Simulator.Now().GetSeconds() - self.past / 1000.0 <= self.T:
         self.socket.Send(a)
         self.task -= 1
         core.Simulator.Schedule(core.Seconds(self.rate), self.send)
@@ -63,18 +65,21 @@ class send(network.Application):
             return
         self.rate = self.list[self.i][2]
         self.rate = self.mtu * 8.0 / self.rate / 1024 / 1024
+
         self.past = int(self.T * self.i * 1000)
+
         self.task = self.list[self.i][0]
         self.task = self.mtu * 8.0 / self.rate / 1024 / 1024
-        self.task = int(1000.0 / self.task)
-        cha = self.task - int(1000.0 / self.rate)
+        self.task = int(1000.0 * self.T / self.task)
+
+        cha = self.task - int(1000.0 * self.T / self.rate)
         if cha > 0:
             for i in range(cha):
                 a = self.packet()
                 self.socket.Send(a)
+        self.i += 1
         # core.Simulator.Schedule(core.Seconds(self.T), self.up)
         core.Simulator.Schedule(core.Seconds(0), self.send)
-        self.i += 1
         pass
 
 
@@ -83,6 +88,7 @@ class recv(network.Application):
         self.socket = soc
         self.past = 0
         self.i = 0
+        self.avgdelay = []
         super(recv, self).__init__()
 
     def StartApplication(self):
@@ -111,13 +117,15 @@ class recv(network.Application):
             new = core.Simulator.Now().GetSeconds() * 1000
             if int(base + new - t) > 250:
                 self.i += 1
-            print self.i * 1.0 / acc, int(base + new - t), i, acc
+            self.avgdelay.append(int(base + new - t))
+            print self.i * 1.0 / acc, int(base + new - t), i, acc, numpy.mean(self.avgdelay), max(self.avgdelay), min(
+                self.avgdelay)
             self.past = new
 
 
 def install(t, li):
     p2pmac = p2p.PointToPointHelper()
-    p2pmac.SetChannelAttribute("Delay", core.TimeValue(core.Seconds(0.02)))
+    p2pmac.SetChannelAttribute("Delay", core.TimeValue(core.Seconds(0.01)))
     p2pmac.SetDeviceAttribute("DataRate", core.StringValue("5.5Mbps"))
 
     stas = network.NodeContainer()
