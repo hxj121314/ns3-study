@@ -111,7 +111,7 @@ class recv(network.Application):
             new = core.Simulator.Now().GetSeconds() * 1000
             if int(base + new - t) > 250:
                 self.i += 1
-                print self.i, int(base + new - t), i, acc
+            print self.i * 1.0 / acc, int(base + new - t), i, acc
             self.past = new
 
 
