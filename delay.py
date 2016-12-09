@@ -152,7 +152,7 @@ if __name__ == '__main__':
     dd = Delay(iid, 0.25)
     li = []
     suulist = []
-    for ii in range(1000):
+    for ii in range(400):
         dd.set_u([ran(dev), ran(dev), ran(dev), ran(dev), ran(dev)])
         dd.con()
         gdm = dd.gdm(video)
@@ -169,4 +169,4 @@ if __name__ == '__main__':
     # print numpy.mean(suulist), max(suulist), min(suulist)
     print '[' + ' '.join([str(iid) for iid in suulist]) + ']'
     pass
-    # 250*4=1000
+    # 100*4=400

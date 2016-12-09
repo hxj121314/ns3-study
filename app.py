@@ -45,7 +45,7 @@ class send(network.Application):
         return a
 
     def send(self):
-        if self.i >= 1000:
+        if self.i >= 400:
             return
         if self.task <= 0:
             slot = self.T * self.i - core.Simulator.Now().GetSeconds()
@@ -61,7 +61,7 @@ class send(network.Application):
         pass
 
     def up(self):
-        if self.i >= 1000:
+        if self.i >= 400:
             return
         self.rate = self.list[self.i][2]
         self.rate = self.mtu * 8.0 / self.rate / 1000000
