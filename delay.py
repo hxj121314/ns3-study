@@ -145,7 +145,7 @@ def ran(devid):
     pass
 
 
-if __name__ == '__main__':
+def main():
     dev = 4
     iid = 4
     video = 6.5  # 3.5 4.5 5.5 6.5
@@ -170,3 +170,20 @@ if __name__ == '__main__':
     print '[' + ' '.join([str(iid) for iid in suulist]) + ']'
     pass
     # 100*4=400
+
+
+def main2():
+    dev = 4
+    video = 6.5
+    su = []
+    for ii in range(400):
+        w = sum([ran(dev), ran(dev), ran(dev)])
+        v = random.uniform(52, 48)
+        m = 0.02 + video * 0.25 / 0.99 / w + video * 0.25 * 2 / 3 / v
+        su.append(m)
+    print numpy.mean(su), max(su), min(su)
+    pass
+
+
+if __name__ == '__main__':
+    main2()
