@@ -12,7 +12,7 @@ def res(name):
         m = i.split()
         m = m[5].split(':')
         assert 'psnr_avg' == m[0]
-        re.append(float(m[1]))
+        re.append(m[1])
     return re
     pass
 
@@ -50,7 +50,10 @@ def cond(name, frame, lo, fi):
 def loss(frame, rate):
     lo = []
     for i in range(2, len(frame)):
-        mtu = int(frame[i] / 1470) + 1
+        fr = frame[i]
+        if i % 5 == 0:
+            fr /= 3 / rate
+        mtu = int(fr / 1470) + 1
         lo.extend([i] * mtu)
     rate = int(len(lo) * rate)
     random.shuffle(lo)
@@ -73,15 +76,12 @@ def sp(i):
     pass
 
 
-def main():
+def main(i, lo):
     lib = ['akiyo', 'coastguard', 'container', 'mobile']
-    i = 1
-    lo = 0.0737
-    # 0.2131 0.0809 0.26439725 0.1051 0.0737
     su = []
     for itera in range(20):
         su.extend(handle(lib[i], lo))
-    print numpy.mean(su), max(su), min(su), len(su), su
+    return su[:5000]
 
 
 def handle(name, lo):
@@ -94,5 +94,30 @@ def handle(name, lo):
     pass
 
 
+def micro():
+    rate = [0.2131, 0.0809, 0.26439725, 0.1051, 0.0737]
+    i = 3
+    for lo in rate:
+        su = main(i, lo)
+        print '[' + ' '.join(su) + '];'
+    pass
+
+
+def avg():
+    rate = [0.1051, 0.0809, 0.0737]  # cl
+    # rate = [0.26439725, 0.2131, 0.0809]  # mu
+    s = []
+    for i in range(4):
+        for lo in rate:
+            su = main(i, lo)
+            su = [float(m) for m in su]
+            s.append(numpy.mean(su))
+            print numpy.mean(su), max(su), min(su)
+    print '[' + ' '.join([str(m) for m in s]) + '];'
+    pass
+
+
 if __name__ == '__main__':
-    main()
+    avg()
+    pass
+# print numpy.mean(su), max(su), min(su), len(su), su
