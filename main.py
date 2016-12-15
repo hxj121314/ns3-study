@@ -44,59 +44,64 @@ class aaa(network.Application):
             print self.i, aa.GetIpv4(), aa.GetPort(), he.GetSeq()
 
 
-# core.LogComponentEnable("UdpEchoClientApplication", core.LOG_LEVEL_INFO)
+def main():
+    # core.LogComponentEnable("UdpEchoClientApplication", core.LOG_LEVEL_INFO)
 
-wifihelper = wifi.WifiHelper.Default()
-wifihelper.SetStandard(wifi.WIFI_PHY_STANDARD_80211a)
+    wifihelper = wifi.WifiHelper.Default()
+    wifihelper.SetStandard(wifi.WIFI_PHY_STANDARD_80211a)
 
-wifiphy = wifi.YansWifiPhyHelper.Default()
-wifichannel = wifi.YansWifiChannelHelper.Default()
-wifiphy.SetChannel(wifichannel.Create())
+    wifiphy = wifi.YansWifiPhyHelper.Default()
+    wifichannel = wifi.YansWifiChannelHelper.Default()
+    wifiphy.SetChannel(wifichannel.Create())
 
-wifimac = wifi.WifiMacHelper()
-wifimac.SetType("ns3::AdhocWifiMac")
-wifihelper.SetRemoteStationManager("ns3::ConstantRateWifiManager", "DataMode", core.StringValue("OfdmRate54Mbps"))
+    wifimac = wifi.WifiMacHelper()
+    wifimac.SetType("ns3::AdhocWifiMac")
+    wifihelper.SetRemoteStationManager("ns3::ConstantRateWifiManager", "DataMode", core.StringValue("OfdmRate54Mbps"))
 
-p2pmac = p2p.PointToPointHelper()
-p2pmac.SetChannelAttribute("Delay", core.TimeValue(core.NanoSeconds(6560)))
-p2pmac.SetDeviceAttribute("DataRate", core.StringValue("2Mbps"))
+    p2pmac = p2p.PointToPointHelper()
+    p2pmac.SetChannelAttribute("Delay", core.TimeValue(core.NanoSeconds(6560)))
+    p2pmac.SetDeviceAttribute("DataRate", core.StringValue("2Mbps"))
 
-stas = network.NodeContainer()
-stas.Create(3)
+    stas = network.NodeContainer()
+    stas.Create(3)
 
-p2ps = network.NodeContainer()
-p2ps.Create(1)
+    p2ps = network.NodeContainer()
+    p2ps.Create(1)
 
-mob = mobility.MobilityHelper()
-mob.Install(stas)
+    mob = mobility.MobilityHelper()
+    mob.Install(stas)
 
-stack = internet.InternetStackHelper()
-stack.Install(stas)
-stack.Install(p2ps)
+    stack = internet.InternetStackHelper()
+    stack.Install(stas)
+    stack.Install(p2ps)
 
-dev = wifihelper.Install(wifiphy, wifimac, stas)
-p2ps.Add(stas.Get(0))
-dev2 = p2pmac.Install(p2ps)
+    dev = wifihelper.Install(wifiphy, wifimac, stas)
+    p2ps.Add(stas.Get(0))
+    dev2 = p2pmac.Install(p2ps)
 
-ip = internet.Ipv4AddressHelper()
-ip.SetBase(network.Ipv4Address('192.168.0.0'), network.Ipv4Mask('255.255.255.0'))
-ip.Assign(dev)
-ip.SetBase(network.Ipv4Address('192.168.1.0'), network.Ipv4Mask('255.255.255.0'))
-ip.Assign(dev2)
+    ip = internet.Ipv4AddressHelper()
+    ip.SetBase(network.Ipv4Address('192.168.0.0'), network.Ipv4Mask('255.255.255.0'))
+    ip.Assign(dev)
+    ip.SetBase(network.Ipv4Address('192.168.1.0'), network.Ipv4Mask('255.255.255.0'))
+    ip.Assign(dev2)
 
-client = p2ps.Get(0)
-client.AddApplication(aaa(network.Socket.CreateSocket(client, internet.UdpSocketFactory.GetTypeId()), 0))
-for i in range(3):
-    client = stas.Get(i)
-    client.AddApplication(aaa(network.Socket.CreateSocket(client, internet.UdpSocketFactory.GetTypeId()), i))
+    client = p2ps.Get(0)
+    client.AddApplication(aaa(network.Socket.CreateSocket(client, internet.UdpSocketFactory.GetTypeId()), 0))
+    for i in range(3):
+        client = stas.Get(i)
+        client.AddApplication(aaa(network.Socket.CreateSocket(client, internet.UdpSocketFactory.GetTypeId()), i))
 
-internet.Ipv4GlobalRoutingHelper.PopulateRoutingTables()
+    internet.Ipv4GlobalRoutingHelper.PopulateRoutingTables()
 
-core.Simulator.Stop(core.Seconds(10.0))
+    core.Simulator.Stop(core.Seconds(10.0))
 
-wifiphy.EnablePcapAll('adhoc', True)
-stack.EnablePcapIpv4All('ipv4')
-core.Simulator.Run()
-core.Simulator.Destroy()
+    wifiphy.EnablePcapAll('adhoc', True)
+    stack.EnablePcapIpv4All('ipv4')
+    core.Simulator.Run()
+    core.Simulator.Destroy()
 
-sys.exit(0)
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()
