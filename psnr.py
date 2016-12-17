@@ -104,8 +104,9 @@ def micro():
 
 
 def avg():
-    rate = [0.1051, 0.0809, 0.0737]  # cl
+    # rate = [0.1051, 0.0809, 0.0737]  # cl
     # rate = [0.26439725, 0.2131, 0.0809]  # mu
+    rate = [0.0000000001]
     s = []
     for i in range(4):
         for lo in rate:
