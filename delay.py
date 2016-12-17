@@ -28,7 +28,7 @@ class Delay(object):
         for i in self.id:
             self.n[i] = 0.01 * random.uniform(0.5, 1.5)
             self.r[i] = 0.02 * random.uniform(0.5, 1.5)
-        self.v = random.uniform(52, 48)
+        self.v = wifi()
 
     def con(self):
         m_u = numpy.mean(self.u)
@@ -41,23 +41,6 @@ class Delay(object):
         self.t_c = t_c
         self.t_w = t_w
         self.base = 0  # (t_w / 2) * (self.num - 1) / self.num
-        return b, o, t_c, t_w
-        pass
-
-    def seq(self):
-        m_u = numpy.mean(self.u)
-        b = 1.0 * (self.num * m_u - self.v) / (self.num * m_u + (self.num - 1) * self.v)
-        o = 1.0 * (self.num * self.v) / (self.num * m_u + (self.num - 1) * self.v)
-        if b < 0:
-            b = 0
-            o = 1.0
-        t_c = self.T / 2
-        t_w = self.T / 2
-        self.b = b
-        self.o = o
-        self.t_c = t_c
-        self.t_w = t_w
-        self.base = (t_c + t_w / 2) * (self.num - 1) / self.num
         return b, o, t_c, t_w
         pass
 
@@ -145,29 +128,31 @@ def ran(devid):
     pass
 
 
+def wifi():
+    return random.uniform(11, 8)
+    pass
+
+
 def main():
     dev = 4
-    iid = 4
+    iid = 3
     video = 6.5  # 3.5 4.5 5.5 6.5
     dd = Delay(iid, 0.25)
     li = []
     suulist = []
     for ii in range(400):
         dd.set_u([ran(dev), ran(dev), ran(dev), ran(dev), ran(dev)])
-        dd.con()
+        b, o, t_c, t_w = dd.con()
+        m = 0.02 + video * (b + o / iid) * 0.25 / dd.u[0]  # + video * 0.25 * 2 / 3 / v
+        suulist.append(m / 2)
         gdm = dd.gdm(video)
         # suulist.append(1 - suu / video)
-        suulist.append(sum([gdm[iii * 8 + 6] for iii in range(iid)]) / iid)
-        li.append((gdm[1] * 0.25, int(dd.base * 1000), gdm[0]))
+        # suulist.append(sum([gdm[iii * 8 + 6] for iii in range(iid)]) / iid)
+        # li.append((gdm[1] * 0.25, int(dd.base * 1000), gdm[0]))
         # print ii, gdm
-        # sys.exit(0)
-        # x = random.uniform(52, 48)/8.0
-        # z = x * (1-random.uniform(0.09, 0.06))
-        # y = random.uniform(x, z)
-        # print x, y, z
     # app.install(0.25, li)
-    # print numpy.mean(suulist), max(suulist), min(suulist)
-    print '[' + ' '.join([str(iid) for iid in suulist]) + ']'
+    print numpy.mean(suulist), max(suulist), min(suulist)
+    # print '[' + ' '.join([str(iid) for iid in suulist]) + ']'
     pass
     # 100*4=400
 
@@ -178,10 +163,20 @@ def main2():
     su = []
     for ii in range(400):
         w = sum([ran(dev), ran(dev), ran(dev)])
-        v = random.uniform(52, 48)
-        m = 0.02 + video * 0.25 / 0.99 / w + video * 0.25 * 2 / 3 / v
-        su.append(m)
+        v = wifi()
+        # m = 0.02 + video * 0.25 / 0.99 / w * 3
+        m = 0.02 + video * 0.25 / v / 0.9
+        su.append(m / 2)
     print numpy.mean(su), max(su), min(su)
+    pass
+
+
+def main3():
+    for i in range(100):
+        v = wifi()
+        w = v * (1 - random.uniform(0.09, 0.06))
+        m = random.uniform(v, w)
+        print v, m, w
     pass
 
 
