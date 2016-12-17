@@ -95,8 +95,8 @@ def handle(name, lo):
 
 
 def micro():
-    rate = [0.2131, 0.0809, 0.26439725, 0.1051, 0.0737]
-    i = 3
+    rate = [0.1017, 0.0661, 0.0852, 0.0742, 0.0646]  # r d g 2 4
+    i = 0
     for lo in rate:
         su = main(i, lo)
         print '[' + ' '.join(su) + '];'
@@ -104,9 +104,8 @@ def micro():
 
 
 def avg():
-    # rate = [0.1051, 0.0809, 0.0737]  # cl
-    # rate = [0.26439725, 0.2131, 0.0809]  # mu
-    rate = [0.0000000001]
+    rate = [0.0742, 0.0661, 0.0646]  # cl
+    # rate = [0.26439725, 0.2131, 0.0661, 0.0000000001]  # mu g r d base
     s = []
     for i in range(4):
         for lo in rate:
@@ -119,6 +118,6 @@ def avg():
 
 
 if __name__ == '__main__':
-    avg()
+    micro()
     pass
 # print numpy.mean(su), max(su), min(su), len(su), su
