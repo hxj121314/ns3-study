@@ -31,18 +31,25 @@ def comp(name):
 
 
 def cond(name, frame, lo, fi):
+    nvb = ''
     iframe = ''
     pframe = ''
+    assert len(frame) == 300
     with open(name + '.264') as f:
         for i in range(len(frame)):
             al = f.read(frame[i])
+            if nvb == '':
+                nvb = al[:328 / 8]
             if i % 5 == 0:
                 if i not in lo:
                     iframe = al
+                # fi.write(nvb)
+                assert iframe != ''
                 fi.write(iframe)
             else:
                 if i not in lo:
                     pframe = al
+                assert pframe != ''
                 fi.write(pframe)
     pass
 
@@ -62,6 +69,8 @@ def loss(frame, rate):
 
 
 def sp(i):
+    with open(i + '.264')as f:
+        allen = len(f.read())
     with open(i + '.txt') as f:
         al = f.readlines()
     frame = []
@@ -72,14 +81,16 @@ def sp(i):
             frame.append(int(s[1]) / 8 + 328 / 8)
         elif l == 12:
             frame.append(int(s[3]) / 8)
+    # print len(frame), allen , sum(frame)
+    assert allen == sum(frame)
     return frame
     pass
 
 
-def main(i, lo):
+def main(i, lo, cir=20):
     lib = ['akiyo', 'coastguard', 'container', 'mobile']
     su = []
-    for itera in range(20):
+    for itera in range(cir):
         su.extend(handle(lib[i], lo))
     return su[:5000]
 
@@ -119,6 +130,7 @@ def avg():
 
 if __name__ == '__main__':
     # avg()
+    main(0, 0.1, 1)
     print 32.00241 - 26.890798, 32.00241 - 27.741814
     pass
 # print numpy.mean(su), max(su), min(su), len(su), su
