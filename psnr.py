@@ -31,32 +31,21 @@ def comp(name):
 
 
 def cond(name, frame, lo, fi):
-    nvb = ''
-    iframe = ''
-    pframe = ''
+    preframe = [''] * 5
     assert len(frame) == 300
     with open(name + '.264') as f:
         for i in range(len(frame)):
             al = f.read(frame[i])
-            if nvb == '':
-                nvb = al[:328 / 8]
-            if i % 5 == 0:
-                if i not in lo:
-                    iframe = al
-                # fi.write(nvb)
-                assert iframe != ''
-                fi.write(iframe)
-            else:
-                if i not in lo:
-                    pframe = al
-                assert pframe != ''
-                fi.write(pframe)
+            if i not in lo:
+                preframe[i % 5] = al
+            assert preframe[i % 5] != ''
+            fi.write(preframe[i % 5])
     pass
 
 
 def loss(frame, rate):
     lo = []
-    for i in range(2, len(frame)):
+    for i in range(5, len(frame)):
         fr = frame[i]
         if i % 5 == 0:
             fr /= 3 / rate
@@ -130,7 +119,7 @@ def avg():
 
 if __name__ == '__main__':
     # avg()
-    main(0, 0.1, 1)
+    # main(0, 0.1, 1)
     print 32.00241 - 26.890798, 32.00241 - 27.741814
     pass
 # print numpy.mean(su), max(su), min(su), len(su), su
