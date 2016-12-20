@@ -80,7 +80,9 @@ def main(i, lo, cir=20):
     lib = ['akiyo', 'coastguard', 'container', 'mobile']
     su = []
     for itera in range(cir):
-        su.extend(handle(lib[i], lo))
+        nsu = handle(lib[i], lo)
+        assert len(nsu) == 300
+        su.extend(nsu)
     return su[:5000]
 
 
@@ -117,10 +119,10 @@ def avg():
 
 
 if __name__ == '__main__':
-    # avg()
-    for ind in range(4):
-        print ind
-        micro(ind)
+    avg()
+    # for ind in range(4):
+    #     print ind
+    #     micro(ind)
     # main(0, 0.1, 1)
     print 33.889826 - 30.7125, 33.889826 - 31.090684
     pass
