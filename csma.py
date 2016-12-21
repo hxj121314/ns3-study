@@ -51,8 +51,9 @@ class recv(network.Application):
             if new > 250:
                 self.i += 1
             self.avgdelay.append(new)
-            print new, self.i, acc, self.i * 1.0 / acc, numpy.mean(self.avgdelay), max(self.avgdelay), min(
-                self.avgdelay)
+            print self.i, acc, len(self.avgdelay), numpy.mean(self.avgdelay), max(
+                self.avgdelay), min(self.avgdelay), (len(self.avgdelay) - self.i) * 1470 * 8 / 1000000.0 / (
+                core.Simulator.Now().GetSeconds() - 1)
 
 
 class send(network.Application):
@@ -69,6 +70,7 @@ class send(network.Application):
             self.add = "10.1.3.1"
         else:
             self.add = "10.1.3.2"
+            print size / inter.GetSeconds() * 8 / 1000000
         super(send, self).__init__()
         pass
 
@@ -79,7 +81,7 @@ class send(network.Application):
         if self.nouse:
             core.Simulator.Schedule(core.Seconds(0), self.up)
         else:
-            core.Simulator.Schedule(core.Seconds(0), self.up2)
+            core.Simulator.Schedule(core.Seconds(1.0), self.up2)
         pass
 
     def packet(self):
@@ -94,8 +96,8 @@ class send(network.Application):
 
     def up2(self):
         self.past = int(core.Simulator.Now().GetSeconds() * 1000)
-        num = 1.0 / self.inter.GetSeconds()
-        num *= 0.6
+        num = 0.25 / self.inter.GetSeconds()
+        # num *= 0.6
         for i in range(int(num)):
             a = self.packet()
             self.soc.Send(a)
@@ -141,7 +143,8 @@ def main(li):
     phy.SetChannel(channel.Create())
 
     wifi = www.WifiHelper()
-    wifi.SetRemoteStationManager("ns3::AarfWifiManager")
+    # wifi.SetRemoteStationManager("ns3::AarfWifiManager")
+    wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager", "DataMode", core.StringValue("OfdmRate54Mbps"))
 
     mac = www.WifiMacHelper()
     ssid = www.Ssid("ns-3-ssid")
@@ -201,7 +204,7 @@ def main(li):
     # pointToPoint.EnablePcapAll("third")
     # phy.EnablePcapAll("csma")
     # csma.EnablePcapAll("third", True)
-    stack.EnablePcapIpv4All('ics')
+    # stack.EnablePcapIpv4All('ics')
 
     core.Simulator.Run()
     core.Simulator.Destroy()
