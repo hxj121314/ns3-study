@@ -48,7 +48,7 @@ def loss(frame, rate):
     for i in range(5, len(frame)):
         fr = frame[i]
         if i % 5 == 0:
-            fr /= 3 / rate
+            fr /= 1  # 3 / rate
         mtu = int(fr / 1470) + 1
         lo.extend([i] * mtu)
     rate = int(len(lo) * rate)
@@ -105,8 +105,8 @@ def micro(i):
 
 
 def avg():
-    rate = [0.0742, 0.0661, 0.0646]  # cl
-    # rate = [0.1252, 0.1117, 0.0661, 0.0000000001]  # mu g r d3 base
+    # rate = [0.0742, 0.0661, 0.0646]  # cl
+    rate = [0.1252, 0.1117, 0.0661, 0.0000000001]  # mu g r d3 base
     s = []
     for i in range(4):
         for lo in rate:
