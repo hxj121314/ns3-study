@@ -171,6 +171,14 @@ def main2():
     pass
 
 
+def ddf(d, t, n, u, r, l):
+    d1 = (2 * d + u * r) ** 2
+    d2 = 1 + (4 * d * u * t) / d1
+    d3 = -(2 * u * t) / (2 * d + u * r)
+    d4 = 1 - math.exp(d3) * d2
+    return (1 - n) * d4 / t * l
+
+
 def main3():
     for i in range(100):
         v = wifi()
@@ -180,5 +188,27 @@ def main3():
     pass
 
 
+def main4():
+    l = 0.1
+    d1 = 0
+    d2 = 0
+    t = 0.25
+    n1 = 0.01
+    n2 = 0.02
+    u1 = 6
+    u2 = 8
+    r1 = 0.02
+    r2 = 0.025
+    su = []
+    for i in range(6):
+        print d1, d2
+        su.append(d1)
+        su.append(d2)
+        d1 += ddf(d1, t, n1, u1, r1, l)
+        d2 += ddf(d2, t, n2, u2, r2, l)
+    print '[' + ' '.join([str(s) for s in su]) + ']'
+    pass
+
+
 if __name__ == '__main__':
-    main2()
+    main4()
