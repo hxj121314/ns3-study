@@ -180,11 +180,14 @@ def ddf(d, t, n, u, r, l):
 
 
 def main3():
-    for i in range(100):
+    udp = []
+    for i in range(1000):
         v = wifi()
         w = v * (1 - random.uniform(0.09, 0.06))
         m = random.uniform(v, w)
-        print v, m, w
+        udp.append(','.join([str(m) for m in [v, m, w]]) + '\r\n')
+    with open('udp.txt', 'w') as f:
+        f.writelines(udp)
     pass
 
 
@@ -211,4 +214,4 @@ def main4():
 
 
 if __name__ == '__main__':
-    main4()
+    main3()
