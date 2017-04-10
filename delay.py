@@ -3,6 +3,7 @@ import math
 import random
 import app
 import sys
+from sympy import *
 
 
 class Delay(object):
@@ -213,5 +214,31 @@ def main4():
     pass
 
 
+def tw():
+    init_printing()
+    di, b, d, v, rtt, t, u = symbols("di b d v rtt t u")
+    tw = t - (1 - b) * d / u
+    lam = -2 * v * tw / (2 * (di - b * d) + v * rtt)
+    fun = (di - b * d) * (1 - exp(lam * tw))
+    ddd = diff(fun, b)
+    print latex(ddd)
+    print latex(simplify(ddd))
+
+
+def di():
+    init_printing()
+    di, n, u, tc, rtt, fi, b, d, v, tw, rttw = symbols("di n u tc rtt fi b d v tw rttw")
+    fun = di * (1 - n) * (1 - exp(-2 * u * tc / (2 * di + u * rtt))) - di + (n - 1) * (1 - fi) * (di - b * d) * (
+        1 - exp(-2 * v * tw / ((2 * di - b * d) + v * rttw)))
+    ddd = diff(fun, di)
+    fun2 = (1 - n) * (
+        1 - exp(-2 * u * tc / (2 * di + u * rtt)) * (1 + 4 * di * u * tc / ((2 * di + u * rtt) ** 2))) - 1 + (n - 1) * (
+        1 - fi) * (1 - exp(-2 * v * tw / (2 * (di - b * d) + v * rttw)) * (
+        1 + 4 * (di - b * d) * v * tw / ((2 * (di - b * d) + v * rttw) ** 2)))
+    fun3 = ddd - fun2
+    print fun3
+    print simplify(fun3)
+
+
 if __name__ == '__main__':
-    main3()
+    di()
