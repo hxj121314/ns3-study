@@ -19,9 +19,9 @@ class YUVUtil(object):
                 u = f.read(self._w * self._h / 4)
                 v = f.read(self._w * self._h / 4)
 
-                y = np.array([ord(i) for i in list(y)], dtype=np.uint8)
-                u = np.array([ord(i) for i in list(u)], dtype=np.uint8)
-                v = np.array([ord(i) for i in list(v)], dtype=np.uint8)
+                y = np.array(bytearray(y), dtype=np.uint8)
+                u = np.array(bytearray(u), dtype=np.uint8)
+                v = np.array(bytearray(v), dtype=np.uint8)
 
                 y = y.reshape((self._w, self._h))
                 u = u.reshape((self._w / 2, self._h / 2))
@@ -98,11 +98,12 @@ def show_img():
 def split_run():
     name = 'container_cif'
     w = 352
-    h = 288
+    h = 284
     util = YUVUtil()
     with open(name + '_sp.yuv', 'wb') as f:
         for frm in util.read420(name + '.yuv'):
-            f.write(util.yuv_split(frm, w, h, 0, 0))
+            data = util.yuv_split(frm, w, h, 0, 0)
+            f.write(data)
     util.yuv2h264(name + '_sp.yuv', w, h)
 
 
