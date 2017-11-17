@@ -33,10 +33,10 @@ class YUVUtil(object):
         if os.path.exists(output):
             os.remove(output)
         subprocess.check_output(
-            "ffmpeg -i " +
-            name +
+            "ffmpeg " +
             " -f rawvideo -pix_fmt yuv420p -s:v " +
-            str(w) + "x" + str(h) +
+            str(w) + "x" + str(h) + " -i " +
+            name +
             " -r 25 -c:v libx264 " + output,
             shell=True, stderr=subprocess.STDOUT)
 
@@ -97,12 +97,12 @@ def show_img():
 
 def split_run():
     name = 'container_cif'
-    w = 50
-    h = 50
+    w = 352
+    h = 288
     util = YUVUtil()
     with open(name + '_sp.yuv', 'wb') as f:
         for frm in util.read420(name + '.yuv'):
-            f.write(util.yuv_split(frm, w, h, 100, 100))
+            f.write(util.yuv_split(frm, w, h, 0, 0))
     util.yuv2h264(name + '_sp.yuv', w, h)
 
 
