@@ -23,9 +23,11 @@ class YUVUtil(object):
                 u = np.array(bytearray(u), dtype=np.uint8)
                 v = np.array(bytearray(v), dtype=np.uint8)
 
-                y = y.reshape((self._w, self._h))
-                u = u.reshape((self._w / 2, self._h / 2))
-                v = v.reshape((self._w / 2, self._h / 2))
+                y = y.reshape((self._h, self._w))
+                u = u.reshape((self._h / 2, self._w / 2))
+                v = v.reshape((self._h / 2, self._w / 2))
+                assert len(y) == self._h
+                assert len(y[0]) == self._w
                 yield y, u, v
 
     @staticmethod
@@ -79,9 +81,9 @@ class YUVUtil(object):
         u = np.repeat(u, 2, 1)
         v = np.repeat(v, 2, 0)
         v = np.repeat(v, 2, 1)
-        y = y[off_w:off_w + w, off_h:off_h + h]
-        u = u[off_w:off_w + w, off_h:off_h + h]
-        v = v[off_w:off_w + w, off_h:off_h + h]
+        y = y[off_h:off_h + h, off_w:off_w + w]
+        u = u[off_h:off_h + h, off_w:off_w + w]
+        v = v[off_h:off_h + h, off_w:off_w + w]
         u = u[::2, ::2]
         v = v[::2, ::2]
         return y, u, v
@@ -99,14 +101,12 @@ def show_img():
 
 def split_run():
     name = 'container_cif'
-    w = 352
-    h = 288
+    w = 176
+    h = 144
     util = YUVUtil()
     with open(name + '_sp.yuv', 'wb') as f:
         for frm in util.read420(name + '.yuv'):
-            data = util.yuv_split(frm, w, h, 0, 0)
-            print len(data[0])
-            exit()
+            data = util.yuv_split(frm, w, h, w, h)
             f.write(''.join([i.tostring() for i in data]))
     util.yuv2h264(name + '_sp.yuv', w, h)
 
