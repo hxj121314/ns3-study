@@ -61,14 +61,16 @@ class YUVUtil(object):
         b = y + 2.032 * (u - 128.0)
         return r.astype(np.uint8), g.astype(np.uint8), b.astype(np.uint8)
 
-    def rgb2img(self, (r, g, b)):
-        im_r = Image.frombytes('L', self._size, r.tostring())
-        im_g = Image.frombytes('L', self._size, g.tostring())
-        im_b = Image.frombytes('L', self._size, b.tostring())
+    def rgb2img(self, (r, g, b), size=None):
+        if None is size:
+            size = self._size
+        im_r = Image.frombytes('L', size, r.tostring())
+        im_g = Image.frombytes('L', size, g.tostring())
+        im_b = Image.frombytes('L', size, b.tostring())
         return Image.merge('RGB', (im_r, im_g, im_b))
 
-    def yuv2img(self, yuv):
-        return self.rgb2img(self.yuv2rgb(yuv))
+    def yuv2img(self, yuv, size=None):
+        return self.rgb2img(self.yuv2rgb(yuv), size)
 
     def yuv_split(self, (y, u, v), w, h, off_w, off_h):
         assert w + off_w <= self._w
@@ -82,7 +84,7 @@ class YUVUtil(object):
         v = v[off_w:off_w + w, off_h:off_h + h]
         u = u[::2, ::2]
         v = v[::2, ::2]
-        return y.tostring() + u.tostring() + v.tostring()
+        return y, u, v
 
 
 def show_img():
@@ -98,12 +100,14 @@ def show_img():
 def split_run():
     name = 'container_cif'
     w = 352
-    h = 284
+    h = 288
     util = YUVUtil()
     with open(name + '_sp.yuv', 'wb') as f:
         for frm in util.read420(name + '.yuv'):
             data = util.yuv_split(frm, w, h, 0, 0)
-            f.write(data)
+            print len(data[0])
+            exit()
+            f.write(''.join([i.tostring() for i in data]))
     util.yuv2h264(name + '_sp.yuv', w, h)
 
 
