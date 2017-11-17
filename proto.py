@@ -31,7 +31,7 @@ class YUVUtil(object):
                 yield y, u, v
 
     @staticmethod
-    def yuv2h264(name, w, h, output='sp.mp4'):
+    def yuv2h264(name, (w, h), output='sp.mp4'):
         if os.path.exists(output):
             os.remove(output)
         subprocess.check_output(
@@ -43,11 +43,12 @@ class YUVUtil(object):
             shell=True, stderr=subprocess.STDOUT)
 
     @staticmethod
-    def comp(f1, f2):
+    def comp(f1, f2, (w, h)):
         subprocess.check_output(
             "ffmpeg -i " +
             f2 +
-            " -pix_fmt yuv420p -s 352x288 -i " +
+            " -pix_fmt yuv420p -s " +
+            str(w) + "x" + str(h) + " -i " +
             f1 +
             " -filter_complex \"psnr='stats_file=" + f1 + ".log'\" -f null -",
             shell=True, stderr=subprocess.STDOUT)
@@ -74,7 +75,7 @@ class YUVUtil(object):
     def yuv2img(self, yuv, size=None):
         return self.rgb2img(self.yuv2rgb(yuv), size)
 
-    def yuv_split(self, (y, u, v), w, h, off_w, off_h):
+    def yuv_split(self, (y, u, v), (w, h), (off_w, off_h)):
         assert w + off_w <= self._w
         assert h + off_h <= self._h
         u = np.repeat(u, 2, 0)
@@ -103,12 +104,14 @@ def split_run():
     name = 'container_cif'
     w = 176
     h = 144
+    tmp_size = (w, h)
     util = YUVUtil()
     with open(name + '_sp.yuv', 'wb') as f:
         for frm in util.read420(name + '.yuv'):
-            data = util.yuv_split(frm, w, h, w, h)
+            data = util.yuv_split(frm, tmp_size, (0, 0))
             f.write(''.join([i.tostring() for i in data]))
-    util.yuv2h264(name + '_sp.yuv', w, h)
+    util.yuv2h264(name + '_sp.yuv', tmp_size)
+    util.comp(name + '_sp.yuv', 'sp.mp4', tmp_size)
 
 
 if __name__ == '__main__':
