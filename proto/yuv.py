@@ -51,15 +51,15 @@ class YUVUtil(object):
         f1 = self._output + f1
         subprocess.check_output(
             "ffmpeg -i " +
-            self._source +
+            f1 +
             " -pix_fmt yuv420p -s " +
             str(self._w) + "x" + str(self._h) + " -i " +
-            f1 +
+            self._source +
             " -filter_complex \"psnr='stats_file=" + f1 + ".log'\" -f null -",
             shell=True, stderr=subprocess.STDOUT)
         with open(f1 + ".log") as f:
             content = f.readlines()
-        return content
+        return [i.strip() for i in content]
 
     @staticmethod
     def yuv2rgb((y, u, v)):

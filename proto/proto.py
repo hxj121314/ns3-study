@@ -41,9 +41,10 @@ class Proto(object):
 
     def run(self):
         yuv = YUVUtil(self._name)
-        tmp_size = (176, 144)
+        tmp_size = (352, 288)
         ret = yuv.split_run(tmp_size, (0, 0))
         self._ret['o'] = yuv.split2h264(ret, tmp_size, 'sp.mp4')
+        self._ret['ret'] = yuv.comp('sp.mp4')
         pass
 
     def result(self):
