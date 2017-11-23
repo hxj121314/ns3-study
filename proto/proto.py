@@ -40,11 +40,17 @@ class Proto(object):
                 os.remove(self._output + i)
 
     def run(self):
+        pass
+
+    def _test_yuv(self):
         yuv = YUVUtil(self._name)
         tmp_size = (352, 288)
         ret = yuv.split_run(tmp_size, (0, 0))
         self._ret['o'] = yuv.split2h264(ret, tmp_size, 'sp.mp4')
         self._ret['ret'] = yuv.comp('sp.mp4')
+        self._ret['o2'] = yuv.yuv2h264('sp2.mp4')
+        self._ret['ret2'] = yuv.comp('sp2.mp4')
+        yuv.show_img()
         pass
 
     def result(self):
@@ -57,19 +63,3 @@ class Proto(object):
         for i in self._ret.keys():
             ret.over_item(i, self._ret[i])
         return ret
-
-
-def main():
-    source = 'container_cif'
-    seg_len = 10
-    tile = (4, 4)
-    svc = 3
-    p = Proto(source, seg_len, tile, svc)
-    p.run()
-    print p.result()
-    pass
-
-
-if __name__ == '__main__':
-    main()
-    pass
