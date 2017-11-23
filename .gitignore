@@ -1,7 +1,3 @@
 *.pcap
 .idea/*
 *.pyc
-*.yuv
-*.264
-*.log
-bluesky*
