@@ -3,7 +3,23 @@
 import os
 
 
-class proto(object):
+class ProtoResult(object):
+    def __init__(self, **kargs):
+        self._data = dict(kargs)
+        pass
+
+    def over_item(self, k, v):
+        self._data[k] = v
+
+    def __str__(self):
+        ret = ''
+        for i in sorted(self._data.keys()):
+            if i[0] != '_':
+                ret += i + ' : ' + str(self._data[i]) + '\n'
+        return ret
+
+
+class Proto(object):
     def __init__(self, source, seg_len, tile, svc):
         self._root = os.path.split(os.path.realpath(__file__))[0] + os.sep
         self._source = self._root + 'input' + os.sep + source + '.yuv'
@@ -24,7 +40,13 @@ class proto(object):
         pass
 
     def result(self):
-        return 123
+        ret = ProtoResult(
+            src=self._source,
+            seg_len=self._seg_len,
+            tile=self._tile,
+            svc=self._svc
+        )
+        return ret
 
 
 def main():
@@ -32,7 +54,7 @@ def main():
     seg_len = 10
     tile = (4, 4)
     svc = 3
-    p = proto(source, seg_len, tile, svc)
+    p = Proto(source, seg_len, tile, svc)
     p.run()
     print p.result()
     pass
