@@ -33,7 +33,7 @@ class YUVUtil(object):
                 assert len(y[0]) == self._w
                 yield y, u, v
 
-    def split2h264(self, source, (w, h), output):
+    def split_ffmpeg_h264(self, source, (w, h), output):
         output = self._output + output
         subprocess.check_output(
             "ffmpeg " +
@@ -44,8 +44,8 @@ class YUVUtil(object):
             shell=True, stderr=subprocess.STDOUT)
         return output
 
-    def yuv2h264(self, output='sp.mp4'):
-        return self.split2h264(self._source, self._size, output)
+    def yuv_ffmpeg_h264(self, output='sp.mp4'):
+        return self.split_ffmpeg_h264(self._source, self._size, output)
 
     def comp(self, f1='sp.mp4'):
         f1 = self._output + f1
@@ -110,3 +110,19 @@ class YUVUtil(object):
                 data = self.yuv_split(frm, tmp_size, tmp_off)
                 f.write(''.join([i.tostring() for i in data]))
         return output
+
+    def make_tile(self, tile):
+        x, y = tile
+        w = self._w / x
+        h = self._h / y
+
+        x = 0
+        y = 0
+        for j in range(0, self._h, h):
+            for i in range(0, self._w, w):
+                ret = self.split_run((w, h), (i, j), "sp_{0}_{1}.yuv".format(x, y))
+                self.split_ffmpeg_h264(ret, (w, h), "sp_{0}_{1}.mp4".format(x, y))
+                y += 1
+            y = 0
+            x += 1
+        pass

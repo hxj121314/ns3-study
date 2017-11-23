@@ -40,15 +40,17 @@ class Proto(object):
                 os.remove(self._output + i)
 
     def run(self):
+        yuv = YUVUtil(self._name)
+        yuv.make_tile((2, 2))
         pass
 
     def _test_yuv(self):
         yuv = YUVUtil(self._name)
         tmp_size = (352, 288)
         ret = yuv.split_run(tmp_size, (0, 0))
-        self._ret['o'] = yuv.split2h264(ret, tmp_size, 'sp.mp4')
+        self._ret['o'] = yuv.split_ffmpeg_h264(ret, tmp_size, 'sp.mp4')
         self._ret['ret'] = yuv.comp('sp.mp4')
-        self._ret['o2'] = yuv.yuv2h264('sp2.mp4')
+        self._ret['o2'] = yuv.yuv_ffmpeg_h264('sp2.mp4')
         self._ret['ret2'] = yuv.comp('sp2.mp4')
         yuv.show_img()
         pass
