@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 #  -*- coding:utf-8 -*-
 import os
+from yuv import YUVUtil
 
 
 class ProtoResult(object):
@@ -21,12 +22,14 @@ class ProtoResult(object):
 
 class Proto(object):
     def __init__(self, source, seg_len, tile, svc):
+        self._name = source
         self._root = os.path.split(os.path.realpath(__file__))[0] + os.sep
         self._source = self._root + 'input' + os.sep + source + '.yuv'
         self._output = self._root + 'output' + os.sep
         self._seg_len = seg_len
         self._tile = tile
         self._svc = svc
+        self._ret = {}
         self.check_env()
         pass
 
@@ -37,6 +40,10 @@ class Proto(object):
                 os.remove(self._output + i)
 
     def run(self):
+        yuv = YUVUtil(self._name)
+        tmp_size = (176, 144)
+        ret = yuv.split_run(tmp_size, (0, 0))
+        self._ret['o'] = yuv.split2h264(ret, tmp_size, 'sp.mp4')
         pass
 
     def result(self):
@@ -46,6 +53,8 @@ class Proto(object):
             tile=self._tile,
             svc=self._svc
         )
+        for i in self._ret.keys():
+            ret.over_item(i, self._ret[i])
         return ret
 
 
