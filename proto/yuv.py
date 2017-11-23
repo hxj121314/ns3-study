@@ -33,7 +33,7 @@ class YUVUtil(object):
                 assert len(y[0]) == self._w
                 yield y, u, v
 
-    def split_ffmpeg_h264(self, source, (w, h), output):
+    def split_ffmpeg_h264(self, source, (w, h), output='sp.264'):
         output = self._output + output
         subprocess.check_output(
             "ffmpeg " +
@@ -44,7 +44,7 @@ class YUVUtil(object):
             shell=True, stderr=subprocess.STDOUT)
         return output
 
-    def yuv_ffmpeg_h264(self, output='sp.mp4'):
+    def yuv_ffmpeg_h264(self, output='sp.264'):
         return self.split_ffmpeg_h264(self._source, self._size, output)
 
     def comp(self, f1='sp.mp4'):
