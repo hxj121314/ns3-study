@@ -17,7 +17,7 @@ class YUVUtil(object):
         self._encoder = YUVEncode(self._output)
 
     def get_output(self):
-        return self._output
+        return self._root + 'output' + os.sep
 
     def read420(self):
         with open(self._source, 'rb') as f:
@@ -286,9 +286,10 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
             print rl.strip()
         return self._output + output
 
-    def demultiplex(self, source, seg_len=30000000, f_rate=60):
+    def demultiplex(self, source, output='', seg_len=30000000, f_rate=60):
+        output = self._output + output
         cmd = self._lib + 'demultiplex.py {0} {1} {2} {3}'
-        cmd = cmd.format(source, seg_len, self._output, f_rate)
+        cmd = cmd.format(source, seg_len, output, f_rate)
         sp = subprocess.Popen(
             cmd, stdout=subprocess.PIPE,
             shell=True, stderr=subprocess.STDOUT)

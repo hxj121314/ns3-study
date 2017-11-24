@@ -62,7 +62,7 @@ class Proto(object):
         enc = YUVEncode(yuv.get_output())
         self._ret['o'] = enc.ffmpeg_h264(ret, tmp_size, 'sp.mp4')
         enc.jm_h264('./input/container_cif.yuv', (352, 288))
-        
+
         enc = SVCEncode(yuv.get_output())
         ret = enc.jsvm_h264(self._root + 'input/container_cif.yuv', (352, 288))
         enc.demultiplex(ret)

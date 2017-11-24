@@ -533,7 +533,7 @@ if writeDASHOutput:
     # close adaptation set and mpd file
     mpd += mpdAdaptationSetClosing
 
-    with open(mpdFilename, "w") as mpdOut:
+    with open(os.path.join(outputFolder, mpdFilename), "w") as mpdOut:
         mpdOut.write(mpd)
         mpdOut.close()
     print mpd
