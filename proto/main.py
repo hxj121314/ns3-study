@@ -23,9 +23,9 @@ def test_yuv():
 
     enc = SVCEncode(yuv.get_output())
     ret = enc.jsvm_h264(os.path.split(os.path.realpath(__file__))[0] + os.sep + 'input/container_cif.yuv', (352, 288))
-    enc.demultiplex(ret)
-    ret = enc.merge()
-    yuv.comp(ret)
+    enc.de_multiplex(ret)
+    ret = enc.merge(l=2)
+    yuv.comp_yuv(ret)
     pass
 
 

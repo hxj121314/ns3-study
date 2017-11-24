@@ -1,6 +1,5 @@
 #!/usr/bin/env python2.7
 #  -*- coding:utf-8 -*-
-import os
 from jmenc import YUVEncode
 
 
@@ -85,7 +84,7 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
         self.wait_proc(cmd)
         return self._output + output
 
-    def demultiplex(self, source, output='', seg_len=30000000, f_rate=60):
+    def de_multiplex(self, source, output='', seg_len=30000000, f_rate=60):
         output = self._output + output
         cmd = self._lib + 'demultiplex.py {0} {1} {2} {3}'
         cmd = cmd.format(source, seg_len, output, f_rate)
@@ -95,7 +94,6 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
     def merge(self, source='jsvm', seg=0, l=3):
         """
         merge 264 init svc...
-        H264AVCDecoderLibTestStatic 264 yuv
         """
         assert l > 0
         source = self._output + source
@@ -110,6 +108,9 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
         return self.jsvm_decode(source + '_rec')
 
     def jsvm_decode(self, source):
+        """
+        H264AVCDecoderLibTestStatic 264 yuv
+        """
         cmd = self._lib + 'H264AVCDecoderLibTestStatic ' + source + '.264 ' + source + '.yuv '
         try:
             self.wait_proc(cmd)
