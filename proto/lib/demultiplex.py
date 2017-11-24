@@ -47,25 +47,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 '''
 
-
-
 import sys, struct, os
-import argparse # for parsing the commandline
+import argparse  # for parsing the commandline
 import H264Parser
 
 cmdParser = argparse.ArgumentParser(description="SVC Stream Multiplexer")
-cmdParser.add_argument("-a", "--analyze", help="Don't generate output, only analyze the input stream", action="store_true")
-cmdParser.add_argument('inputStream', help="the input H.264/SVC stream" )
+cmdParser.add_argument("-a", "--analyze", help="Don't generate output, only analyze the input stream",
+                       action="store_true")
+cmdParser.add_argument('inputStream', help="the input H.264/SVC stream")
 cmdParser.add_argument('framesPerSegment', help="number of frames per segment", type=int)
 cmdParser.add_argument('outputFolder', help="where to write the output (default: ./)", nargs='?', const="./")
 cmdParser.add_argument('frameRate', help="framerate of the input video (default: 24)", type=int, nargs='?', const=24)
-cmdParser.add_argument('skipFrames', help="number of frames to skip at the beginning of the stream (default: 0)", type=int, nargs='?', const=0)
+cmdParser.add_argument('skipFrames', help="number of frames to skip at the beginning of the stream (default: 0)",
+                       type=int, nargs='?', const=0)
 cmdParser.add_argument("baseURL", help="the baseURL for generating the MPD file", nargs='?', const="./tmp")
-cmdParser.add_argument("-t", "--temporal", help="Use temporal scalability and specify the number of temporal layers",  type=int)
+cmdParser.add_argument("-t", "--temporal", help="Use temporal scalability and specify the number of temporal layers",
+                       type=int)
 #
 
 cmdArgs = cmdParser.parse_args()
-
 
 # parse parameters
 outputFolder = cmdArgs.outputFolder  # defines the output folder for DASH content (if selected)
@@ -93,9 +93,8 @@ numTemporalLayers = 0
 
 if not cmdArgs.temporal is None:
     print "Temporal scalability enabled!"
-    temporalScalability = True # specify whether to use temporal scalability too
+    temporalScalability = True  # specify whether to use temporal scalability too
     numTemporalLayers = cmdArgs.temporal
-
 
 # check if output folder exists, if not, create it
 if not os.path.exists(outputFolder) and not cmdArgs.analyze:
@@ -104,7 +103,6 @@ if not os.path.exists(outputFolder) and not cmdArgs.analyze:
 # get base name of the input file ($base$.264)
 base = os.path.splitext(os.path.basename(cmdArgs.inputStream))[0]
 print "Analyzing SVC Stream of " + str(cmdArgs.inputStream)
-
 
 # Configuration Part (do not change unless you know what you are doing)
 configSvcExtension = ".svc"
@@ -116,7 +114,6 @@ configChunkFilenameTemplate = "{base}.seg{seg}-L{layerId}{svcExtension}"
 initFilename = configInitSegFilenameTemplate.format(base=base, svcExtension=configSvcExtension)
 mpdFilename = configMPDFilenameTemplate.format(base=base)
 
-
 if writeDASHOutput:
     # remove existing initfilename (just in case)
     if os.path.isfile(os.path.join(outputFolder, initFilename)):
@@ -124,7 +121,7 @@ if writeDASHOutput:
 
 # split input binary data by using a binary separator 0001
 sep = struct.pack("BBBB", 0, 0, 0, 1)
-nalus = [] # this array contains all NAL-Units and needs to be parsed
+nalus = []  # this array contains all NAL-Units and needs to be parsed
 with open(cmdArgs.inputStream, 'rb') as fpIn:
     nalus = fpIn.read().split(sep)[1:]
 tid = 0
@@ -132,11 +129,11 @@ tid = 0
 # some variables for parsing
 oldSeg = -1
 extraText = ""
-framesInThisSegment=0
-warnings=0
+framesInThisSegment = 0
+warnings = 0
 firstHeader = True
 frm, last, init, segmentNumberChanged = 0, 0, True, True
-segmentFileName=""
+segmentFileName = ""
 header = False
 svc_extension_active = False
 lastNaluType = -1
@@ -147,7 +144,7 @@ layerDashInfo = {}
 
 # array for buffering the segment output (per layer)
 segmentOutputBuffer = {}
-layerId=0
+layerId = 0
 # go through all NAL units
 for n in nalus:
     # local variables for the loop
@@ -156,18 +153,18 @@ for n in nalus:
 
     # NALU Structure (Bit): forbidden zero bit (u1), nal_ref_idc (u3), nalu_type (u5)
     # read NAL-Unit-Type and the Nal-REF-IDC
-    nal_ref_idc = struct.unpack_from("B", n)[0] >> 5 # get the leftmost 3 bit
-    naluType = struct.unpack_from("B", n)[0] & 0x1f # get the rightmost 5 bit
+    nal_ref_idc = struct.unpack_from("B", n)[0] >> 5  # get the leftmost 3 bit
+    naluType = struct.unpack_from("B", n)[0] & 0x1f  # get the rightmost 5 bit
 
-    if naluType == 6: # header or new AU
+    if naluType == 6:  # header or new AU
         naluTypeSixCount += 1
 
     # NaluType 14 --> Prefix NAL Unit, NaluType 20 --> Coded Slice Extension;
     # both contain depency id, quality id and temporal id --> read them
-    if naluType in [14,20] and len(n) >= 4:
+    if naluType in [14, 20] and len(n) >= 4:
         hdr = struct.unpack_from("BBBB", n)
         # extract (D,T,Q) triple from header
-        did = ( hdr[2] >> 4 ) & 0x7
+        did = (hdr[2] >> 4) & 0x7
         qid = hdr[2] & 0xF
         tid = (hdr[3] >> 5)
 
@@ -192,7 +189,7 @@ for n in nalus:
         # type -1 --> no header provided, still need to start somewhere
         # type 1 --> non-IDR frame was last
         # type 5 --> IDR frame was last
-        if lastNaluType == 6 or lastNaluType == 20 or lastNaluType == 8 or lastNaluType == -1\
+        if lastNaluType == 6 or lastNaluType == 20 or lastNaluType == 8 or lastNaluType == -1 \
                 or (naluTypeSixCount == 1 and (lastNaluType == 1 or lastNaluType == 5)):
 
             if skipFrames > 0:
@@ -203,60 +200,63 @@ for n in nalus:
         # end if
 
         # calculate the new (current) segment number and detect if it changed
-        newSeg = int((frm-1) / framesPerSeg)
+        newSeg = int((frm - 1) / framesPerSeg)
         segmentNumberChanged = (oldSeg != newSeg)
 
         if segmentNumberChanged:
-            if newSeg > 0: # segment number changed and it was not the first segment
+            if newSeg > 0:  # segment number changed and it was not the first segment
                 # check number of frames in this segment (should be equal to framesPerSeg)
                 print "--- SEGMENT", seg, "ENDED WITH " + str(framesInThisSegment) + " FRAMES"
                 if framesInThisSegment != framesPerSeg:
                     # invalid number of frames found in this segment
                     print "----- WARNING: Segment", seg, "contains", framesInThisSegment, ", not", framesPerSeg, "!!!"
                     warnings += 1
-                    sys.stderr.write("----- WARNING: Segment " + str(seg) + "contains " + str(framesInThisSegment) +  ", not" + str(framesPerSeg) +  " as specified!!!")
+                    sys.stderr.write(
+                        "----- WARNING: Segment " + str(seg) + "contains " + str(framesInThisSegment) + ", not" + str(
+                            framesPerSeg) + " as specified!!!")
                 # end if segment frame check
 
                 if writeDASHOutput:
                     # write buffered output
                     print "---- Writing Buffer to File ----"
                     for tmpLayerId in segmentOutputBuffer.keys():
-                        tmpSegmentFileName = configChunkFilenameTemplate.format(base=base, seg=seg, layerId = tmpLayerId, svcExtension=configSvcExtension)
+                        tmpSegmentFileName = configChunkFilenameTemplate.format(base=base, seg=seg, layerId=tmpLayerId,
+                                                                                svcExtension=configSvcExtension)
                         # write old segment to file
-                        print "Writing" , tmpSegmentFileName
+                        print "Writing", tmpSegmentFileName
                         with open(os.path.join(outputFolder, tmpSegmentFileName), 'wb') as fpOut:
                             fpOut.write(segmentOutputBuffer[tmpLayerId])
                             segmentOutputBuffer[tmpLayerId] = ""
                             fpOut.close()
-                    # end for
-                # end if
+                            # end for
+                            # end if
             # new segment is starting, reset framesInThisSegment
             print "--- NEW SEGMENT " + str(newSeg) + " (Frame " + str(frm) + ") ----"
             framesInThisSegment = 0
-        
+
         extraText = "NEW FRAME (Frame Number: " + str(frm) + ")"
-    elif naluType == 5: # IDR Frame found, check if it is at the beginning of the segment
+    elif naluType == 5:  # IDR Frame found, check if it is at the beginning of the segment
         extraText = ">!   IDR FRAME   !<"
         if framesInThisSegment > 0 and seg >= 0:
             extraText = extraText, " - WARNING: IDR FRAME NOT AT BEGINNING OF SEGMENT!!!"
             warnings += 1
             sys.stderr.write("WARNING: IN SEGMENT " + str(seg) + ": IDR FRAME FOUND IN THE MIDDLE OF SEGMENT!!!\r\n")
-    elif naluType == 1: # NON-IDR Frame, check if it is at the beginning of the segment
+    elif naluType == 1:  # NON-IDR Frame, check if it is at the beginning of the segment
         extraText = "(Normal Frame)"
         if framesInThisSegment == 0 and seg >= 0:
             extraText = extraText, " - WARNING: SEGMENT STARTED WITHOUT IDR FRAME!!!"
             sys.stderr.write("WARNING: SEGMENT " + str(seg) + " STARTED WITHOUT IDR FRAME!!!\r\n")
             warnings += 1
-    elif naluType == 6 and nal_ref_idc == 0: # detect new header information
+    elif naluType == 6 and nal_ref_idc == 0:  # detect new header information
         print "----- H.264 HEADER INFORMATION -----"
         header = True
-        if naluTypeSixCount > 2: # detect whether this is still the first header or a new AU
+        if naluTypeSixCount > 2:  # detect whether this is still the first header or a new AU
             firstHeader = False
             if len(n) == 5:  # this is an AU delimiter, not a header
                 header = False
-    elif naluType == 10: # detect end of sequence
+    elif naluType == 10:  # detect end of sequence
         extraText = "end of sequence"
-    elif naluType == 11: # end of stream
+    elif naluType == 11:  # end of stream
         extraText = "end of stream"
     elif naluType == 7:
         extraText = "Sequence Parameter Set (SPS)"
@@ -266,27 +266,29 @@ for n in nalus:
         extraText = "Picture Parameter Set"
 
     # calculate old segment number
-    oldSeg = seg = int((frm-1) / framesPerSeg)
+    oldSeg = seg = int((frm - 1) / framesPerSeg)
 
     # chose the filename - if it is not a header, use the chunk filename template
     if not header:
-        segmentFileName = configChunkFilenameTemplate.format(base=base, seg=seg, layerId = layerId, svcExtension=configSvcExtension)
-    else: # if it is the first header, use the init-segment, else just skip it
+        segmentFileName = configChunkFilenameTemplate.format(base=base, seg=seg, layerId=layerId,
+                                                             svcExtension=configSvcExtension)
+    else:  # if it is the first header, use the init-segment, else just skip it
         if firstHeader:
             segmentFileName = initFilename
         else:
             segmentFileName = "skip"
-        # end if
+            # end if
     # end if
 
     mode = None
-    length = len(sep+n)   
+    length = len(sep + n)
 
     # print some information, and count the segment sizes etc...
     if did != -1:
         if skipFrames == 0:
-            print "NALU-T:", naluType, "; nal_ref_idc:", nal_ref_idc,",\tlen=" + str(len(n)).rjust(7) + \
-                                                                     "\t--> seg:", str(seg).zfill(3), ", layer="+ str(layerId), \
+            print "NALU-T:", naluType, "; nal_ref_idc:", nal_ref_idc, ",\tlen=" + str(len(n)).rjust(7) + \
+                                                                      "\t--> seg:", str(seg).zfill(3), ", layer=" + str(
+                layerId), \
                 " (Depency = ", did, ", Quality=", qid, ", Tid=", tid, ")", extraText, " --> ", segmentFileName
             if len(layerDashInfo) > 0:
                 layerDashInfo[layerId]['Bytes'] += length
@@ -298,12 +300,14 @@ for n in nalus:
                 layerDashInfo[layerId]['Bytes'] += length
                 if not segmentFileName in layerDashInfo[layerId]['Segments']:
                     layerDashInfo[layerId]['Segments'].append(segmentFileName)
-                # end if
+                    # end if
             # end if
-            print "NALU-T:", naluType, "; nal_ref_idc:", nal_ref_idc,",\tlen=" + str(len(n)).rjust(7) + "\t--> seg:", str(seg).zfill(3), ", layer="+ str(layerId), extraText, " --> ", segmentFileName
-    else: # if header
-        print "NALU-T:", naluType, "; nal_ref_idc:", nal_ref_idc,",\tlen=" + str(len(n)).rjust(7) + "\t\t",  extraText, " --> ", segmentFileName
-        
+            print "NALU-T:", naluType, "; nal_ref_idc:", nal_ref_idc, ",\tlen=" + str(len(n)).rjust(
+                7) + "\t--> seg:", str(seg).zfill(3), ", layer=" + str(layerId), extraText, " --> ", segmentFileName
+    else:  # if header
+        print "NALU-T:", naluType, "; nal_ref_idc:", nal_ref_idc, ",\tlen=" + str(len(n)).rjust(
+            7) + "\t\t", extraText, " --> ", segmentFileName
+
     if writeDASHOutput and segmentFileName != "skip":
         if not header:
             if skipFrames == 0:
@@ -317,7 +321,7 @@ for n in nalus:
     # parse SPS if this is the first time the header information appears
     # basically, at the beginning of the stream we should receive several SPS,
     # one per dependency id
-    if firstHeader and (naluType == 15 or naluType == 7): # subset sequence parameter set (for svc)
+    if firstHeader and (naluType == 15 or naluType == 7):  # subset sequence parameter set (for svc)
         metaData = H264Parser.sps_extract_width_height(n)
 
         # naluType 15 means sub sequence parameter set
@@ -326,13 +330,13 @@ for n in nalus:
 
         # set a dummy layerid
         if temporalScalability:
-            metaData["LayerId"] = (metaData["SPS-ID"])*16
+            metaData["LayerId"] = (metaData["SPS-ID"]) * 16
         else:
             metaData["LayerId"] = (metaData["SPS-ID"])
 
         metaData["FrameRate"] = frameRate
         if temporalScalability:
-            metaData["FrameRate"] = frameRate / pow(2,numTemporalLayers-1)
+            metaData["FrameRate"] = frameRate / pow(2, numTemporalLayers - 1)
 
         print metaData
 
@@ -347,7 +351,7 @@ for n in nalus:
 
         # if temporal scalability is activated, create sub-layers
         if temporalScalability:
-            for tmpI in range(1,numTemporalLayers):
+            for tmpI in range(1, numTemporalLayers):
                 metaData = metaData.copy()
                 metaData["Segments"] = []
                 metaData["LayerId"] += 1
@@ -356,7 +360,6 @@ for n in nalus:
                 print metaData
                 layerDashInfo[metaData["LayerId"]] = metaData
                 segmentOutputBuffer[metaData["LayerId"]] = ""
-
 
     # end if
 
@@ -370,14 +373,15 @@ if writeDASHOutput:
     # write buffered output
     print "---- Writing Buffer to File ----"
     for tmpLayerId in segmentOutputBuffer.keys():
-        tmpSegmentFileName = configChunkFilenameTemplate.format(base=base, seg=seg, layerId = tmpLayerId, svcExtension=configSvcExtension)
+        tmpSegmentFileName = configChunkFilenameTemplate.format(base=base, seg=seg, layerId=tmpLayerId,
+                                                                svcExtension=configSvcExtension)
         # write old segment to file
-        print "Writing" , tmpSegmentFileName
+        print "Writing", tmpSegmentFileName
         with open(os.path.join(outputFolder, tmpSegmentFileName), 'wb') as fpOut:
             fpOut.write(segmentOutputBuffer[tmpLayerId])
             segmentOutputBuffer[tmpLayerId] = ""
             fpOut.close()
-    # end for
+            # end for
 # end if
 
 
@@ -415,7 +419,6 @@ if writeDASHOutput:
                     </Representation>
     """
 
-
     mpdAdaptationSegmentsSVC = """
      <Representation id="{representationId}" dependencyId="{dependencyId}" codecs="SVC" mimeType="video/264"
                                 width="{width}" height="{height}" frameRate="{fps}" sar="1:1" bandwidth="{bandwidth}">
@@ -428,17 +431,15 @@ if writeDASHOutput:
     mpdAdaptationSegmentURL = """                     <SegmentURL media="{SegmentFileName}"/>
     """
 
-
     mpdAdaptationSetClosing = """
      </AdaptationSet>
         </Period>
     </MPD>
     """
 
-    videoLength = round(float(frm) / float(frameRate),3)
+    videoLength = round(float(frm) / float(frameRate), 3)
 
-
-    mpd = mpdHeader.format(duration=str(videoLength), baseURL=os.path.join(baseURL,outputFolder))
+    mpd = mpdHeader.format(duration=str(videoLength), baseURL=os.path.join(baseURL, outputFolder))
     # determine max width / height
     maxHeight = maxWidth = 0
 
@@ -450,7 +451,7 @@ if writeDASHOutput:
             maxHeight = layer['Height']
 
     # start new adaptation set
-    mpd += mpdAdaptationSetStart.format(maxHeight = maxHeight, maxWidth = maxWidth, maxFps = frameRate, initFile = initFilename)
+    mpd += mpdAdaptationSetStart.format(maxHeight=maxHeight, maxWidth=maxWidth, maxFps=frameRate, initFile=initFilename)
 
     # append each layer
     orderedLayerList = sorted(layerDashInfo.keys())
@@ -462,22 +463,19 @@ if writeDASHOutput:
     # usual segment length
     segmentDurationInSeconds = framesPerSeg / frameRate
 
-
     for layerName in orderedLayerList:
         layer = layerDashInfo[layerName]
         segmentList = ""
         for segment in layer['Segments']:
-            segmentList += mpdAdaptationSegmentURL.format(SegmentFileName = segment)
+            segmentList += mpdAdaptationSegmentURL.format(SegmentFileName=segment)
 
         # calculate bitrate
         # calculate bytes per segment
         bitrate = float(layer['Bytes']) / float(len(layer['Segments']))
-        bitrate = int(bitrate / float(framesPerSeg / frameRate) * 8)
-
-
+        bitrate = int(bitrate / float(framesPerSeg * 1.0 / frameRate) * 8)
 
         dependencyId = 0
-        if numTemporalLayers > 0: # temporal
+        if numTemporalLayers > 0:  # temporal
             # temporal layers depend on all temporal layers of the same quality with less fps
             # and all the layers physically above those
             # e.g.: LayerId 2 depends on 0 and 1
@@ -502,7 +500,7 @@ if writeDASHOutput:
                     layerIdList.append(str(tmpId))
 
             # now that we have the layerIdList, calculate the cumulative bitrate
-            cumulativeBitrate = bitrate # of current layer
+            cumulativeBitrate = bitrate  # of current layer
 
             for tmpId in layerIdList:
                 tmpLayer = layerDashInfo[int(tmpId)]
@@ -514,19 +512,23 @@ if writeDASHOutput:
 
             dependencyId = ' '.join(layerIdList)
 
-        else: # not temporal
+        else:  # not temporal
             # non temporal layers depend on all layers, separated by spaces
             dependencyId = ' '.join(layerIdList)
             cumulativeBitrate += bitrate
 
-        if layer['LayerId'] == 0: # base layer, AVC and does not depend on any other layer
+        if layer['LayerId'] == 0:  # base layer, AVC and does not depend on any other layer
             mpd += mpdAdaptationSegmentsAVC.format(width=layer['Width'], height=layer['Height'], fps=layer['FrameRate'],
-                                                   bandwidth=int(cumulativeBitrate),framesSegment=segmentDurationInSeconds * layer['FrameRate'], SegmentList=segmentList,
-                                                representationId=layer['LayerId'])
-        else: # this layer does depend on something
+                                                   bandwidth=int(cumulativeBitrate),
+                                                   framesSegment=segmentDurationInSeconds * layer['FrameRate'],
+                                                   SegmentList=segmentList,
+                                                   representationId=layer['LayerId'])
+        else:  # this layer does depend on something
             mpd += mpdAdaptationSegmentsSVC.format(width=layer['Width'], height=layer['Height'], fps=layer['FrameRate'],
-                                                   bandwidth=int(cumulativeBitrate),framesSegment=segmentDurationInSeconds * layer['FrameRate'], SegmentList=segmentList,
-                                                representationId=layer['LayerId'],dependencyId=dependencyId)
+                                                   bandwidth=int(cumulativeBitrate),
+                                                   framesSegment=segmentDurationInSeconds * layer['FrameRate'],
+                                                   SegmentList=segmentList,
+                                                   representationId=layer['LayerId'], dependencyId=dependencyId)
 
         layerIdList.append(str(layer['LayerId']))
 
@@ -540,15 +542,12 @@ if writeDASHOutput:
 # end writing MPD
 
 # print frame count and number of segments, just to verify everything works!
-print "FrameCount=" + str(frm) + ", Segments=" + str(seg+1)
+print "FrameCount=" + str(frm) + ", Segments=" + str(seg + 1)
 
 # check if there were any warnings - and print the number of warnings to stderr
 sys.stderr.write("Warnings:" + str(warnings) + "\r\n")
 if warnings > 0:
     sys.stderr.write("Warning: Segment borders are not proper!\r\n")
-sys.stderr.write("FrameCount=" + str(frm) + ", Segments=" + str(seg+1) + "\r\n")
-
+sys.stderr.write("FrameCount=" + str(frm) + ", Segments=" + str(seg + 1) + "\r\n")
 
 exit(warnings)
-
-
