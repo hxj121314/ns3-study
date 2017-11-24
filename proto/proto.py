@@ -1,7 +1,8 @@
 #!/usr/bin/env python2.7
 #  -*- coding:utf-8 -*-
 import os
-from yuv import YUVUtil, YUVEncode, SVCEncode
+
+from media import *
 
 
 class ProtoResult(object):
