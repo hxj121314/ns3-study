@@ -45,7 +45,8 @@ class Proto(object):
 
     def run(self):
         enc = SVCEncode(self._util.get_output())
-        ret = enc.merge(l=3)
+        enc.de_multiplex('/Users/zhangxiaoyi/ns3-study/proto/media/../output/jsvm.264', seg_len=30)
+        ret = enc.merge(l=2)
         self._util.comp_yuv(ret)
         pass
 

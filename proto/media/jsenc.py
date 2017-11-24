@@ -88,7 +88,10 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
         output = self._output + output
         cmd = self._lib + 'demultiplex.py {0} {1} {2} {3}'
         cmd = cmd.format(source, seg_len, output, f_rate)
-        self.wait_proc(cmd)
+        try:
+            self.wait_proc(cmd)
+        except AssertionError:
+            pass
         return cmd
 
     def merge(self, source='jsvm', seg=0, l=3):

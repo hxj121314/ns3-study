@@ -125,11 +125,12 @@ class YUVUtil(object):
 
         x = 0
         y = 0
+        data = []
         for j in range(0, self._h, h):
             for i in range(0, self._w, w):
                 ret = self.split_run((w, h), (i, j), "sp_{0}_{1}.yuv".format(x, y))
-                self._encoder.ffmpeg_h264(ret, (w, h), "sp_{0}_{1}.mp4".format(x, y))
+                data.append(ret)
                 y += 1
             y = 0
             x += 1
-        pass
+        return data
