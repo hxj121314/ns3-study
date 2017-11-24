@@ -152,11 +152,12 @@ class YUVEncode(object):
         -p FrameRate=60
         """
         output = self._output + output
-        cmd = '-p SourceWidth={0} -p SourceHeight={1} -p OutputWidth={2} -p OutputHeight={3}' + \
-              '-p OutputFile={4} -p TraceFile={5} -p InputFile={6} -p FramesToBeEncoded={7}' + \
-              ' -p IDRPeriod={8} -p Bitrate={9} -p FrameRate={10}'.format(
-                  w, h, w, h, output, self._output + 'trace.txt', source, frm, gop, rate, f_rate
-              )
+        cmd = '-p SourceWidth={0} -p SourceHeight={1} -p OutputWidth={2} -p OutputHeight={3} ' + \
+              '-p OutputFile={4} -p TraceFile={5} -p InputFile={6} -p FramesToBeEncoded={7} ' + \
+              '-p IDRPeriod={8} -p Bitrate={9} -p FrameRate={10}'
+        cmd = cmd.format(
+            w, h, w, h, output, self._output + 'trace.txt', source, frm, gop, rate, f_rate
+        )
         subprocess.check_output(
             self._root + 'lencod ' + cmd,
             shell=True, stderr=subprocess.STDOUT)

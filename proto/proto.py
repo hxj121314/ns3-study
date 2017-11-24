@@ -41,7 +41,8 @@ class Proto(object):
 
     def run(self):
         yuv = YUVUtil(self._name)
-        yuv.make_tile((2, 2))
+        enc = YUVEncode(yuv.get_output())
+        enc.jm_h264('./input/container_cif.yuv', (352, 288))
         pass
 
     def _test_yuv(self):
