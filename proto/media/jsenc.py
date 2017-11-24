@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 #  -*- coding:utf-8 -*-
 from jmenc import YUVEncode
+import os
 
 
 class SVCEncode(YUVEncode):
@@ -104,19 +105,21 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
             source = self._output + source
         if l == 3:
             return self.jsvm_decode(source)
-        cmd = self._lib + 'svc_merge.py '
-        cmd += source + '_rec.264 '
-        cmd += source + '.init.svc '
-        for i in range(l):
-            cmd += source + '.seg{0}-L{1}.svc '.format(seg, i)
-        self.wait_proc(cmd)
-        return self.jsvm_decode(source + '_rec')
+        output = source + '_rec_{0}.264'.format(l)
+        if not os.path.exists(output):
+            cmd = self._lib + 'svc_merge.py '
+            cmd += output + ' '
+            cmd += source + '.init.svc '
+            for i in range(l):
+                cmd += source + '.seg{0}-L{1}.svc '.format(seg, i)
+            self.wait_proc(cmd)
+        return self.jsvm_decode(output)
 
     def jsvm_decode(self, source):
         """
         H264AVCDecoderLibTestStatic 264 yuv
         """
-        cmd = self._lib + 'H264AVCDecoderLibTestStatic ' + source + '.264 ' + source + '.yuv '
+        cmd = self._lib + 'H264AVCDecoderLibTestStatic ' + source + ' ' + source + '.yuv '
         try:
             self.wait_proc(cmd)
         except AssertionError:

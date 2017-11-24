@@ -112,6 +112,8 @@ class YUVUtil(object):
 
     def split_run(self, tmp_size, tmp_off, output='sp.yuv'):
         output = self._output + output
+        if os.path.exists(output):
+            return output
         with open(output, 'wb') as f:
             for frm in self.read420():
                 data = self.yuv_split(frm, tmp_size, tmp_off)
@@ -128,10 +130,10 @@ class YUVUtil(object):
         data = []
         for j in range(0, self._h, h):
             for i in range(0, self._w, w):
-                ret = self.split_run((w, h), (i, j), "sp_{0}_{1}.yuv".format(x, y))
+                ret = self.split_run((w, h), (i, j), "sp_{0}_{1}_{2}_{3}.yuv".format(x, y, w, h))
                 print 'MAKE', ret
                 data.append(ret)
                 y += 1
             y = 0
             x += 1
-        return data
+        return data, w, h

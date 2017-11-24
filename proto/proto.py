@@ -49,14 +49,17 @@ class Proto(object):
         pass
 
     def _make_tile(self):
-        data = self._util.make_tile(self._tile)
+        data, w, h = self._util.make_tile(self._tile)
         enc = SVCEncode(self._util.get_output())
         for i in data:
             print i
-            if not os.path.exists(i + '.264'):
-                ret = enc.jsvm_h264(i, (352, 288), output=i + '.264', seg_len=3)
+            h264 = i + '.264'
+            if not os.path.exists(h264):
+                ret = enc.jsvm_h264(i, (w, h), output=h264, seg_len=3)
                 enc.de_multiplex(ret, seg_len=30)
             ret = enc.merge(source=i, l=2)
+            tmp_u = YUVUtil(i, w, h)
+            tmp_u.comp_yuv(ret)
 
     def result(self):
         ret = ProtoResult(
