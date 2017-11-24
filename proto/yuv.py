@@ -138,7 +138,7 @@ class YUVEncode(object):
             shell=True, stderr=subprocess.STDOUT)
         return output
 
-    def jm_h264(self, source, (w, h), output='jm.264', frm=300, gop=6, rate=30000000, f_rate=60):
+    def jm_h264(self, source, (w, h), output='jm.264', frm=3, gop=6, rate=30000000, f_rate=60):
         """
         ./lencod.exe 
         -p OutFileMode=0 
@@ -153,10 +153,14 @@ class YUVEncode(object):
         """
         output = self._output + output
         cmd = '-p SourceWidth={0} -p SourceHeight={1} -p OutputWidth={2} -p OutputHeight={3} ' + \
-              '-p OutputFile={4} -p TraceFile={5} -p InputFile={6} -p FramesToBeEncoded={7} ' + \
-              '-p IDRPeriod={8} -p Bitrate={9} -p FrameRate={10}'
+              '-p OutputFile={4} -p InputFile={6} -p FramesToBeEncoded={7} ' + \
+              '-p IDRPeriod={8} -p Bitrate={9} -p FrameRate={10} -p StatsFile={11} -p ReconFile={12} ' \
+              '-p LeakyBucketParamFile={13}'
+        stats = self._output + 'stats.dat'
+        rec = self._output + 'test_rec.yuv'
+        leak = self._output + 'leakybucketparam.cfg'
         cmd = cmd.format(
-            w, h, w, h, output, self._output + 'trace.txt', source, frm, gop, rate, f_rate
+            w, h, w, h, output, None, source, frm, gop, rate, f_rate, stats, rec, leak
         )
         subprocess.check_output(
             self._root + 'lencod ' + cmd,
