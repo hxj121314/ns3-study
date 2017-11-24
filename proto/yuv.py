@@ -159,7 +159,7 @@ class YUVEncode(object):
         stats = self._output + 'stats.dat'
         rec = self._output + 'test_rec.yuv'
         leak = self._output + 'leakybucketparam.cfg'
-        cmd = self._root + 'lencod ' + cmd.format(
+        cmd = self._root + 'lib' + os.sep + 'lencod ' + cmd.format(
             w, h, w, h, output, None, source, frm, gop, rate, f_rate, stats, rec, leak
         )
         sp = subprocess.Popen(
