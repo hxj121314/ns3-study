@@ -38,13 +38,15 @@ class Proto(object):
         for i in os.listdir(self._output):
             if i[0] != '.':
                 if not os.path.isdir(self._output + i):
-                    os.remove(self._output + i)
+                    # os.remove(self._output + i)
+                    pass
 
     def run(self):
         yuv = YUVUtil(self._name)
         enc = SVCEncode(yuv.get_output())
-        ret = enc.jsvm_h264(self._root + 'input/container_cif.yuv', (352, 288))
-        enc.demultiplex(ret)
+        ret = enc.merge()
+        yuv2 = YUVUtil(yuv.get_output() + 'jsvm.264')
+        yuv2.comp_yuv(ret)
         pass
 
     def _test_yuv(self):

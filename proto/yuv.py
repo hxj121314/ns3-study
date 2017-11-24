@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 import subprocess
 import os
+import time
 
 
 class YUVUtil(object):
@@ -12,8 +13,12 @@ class YUVUtil(object):
         self._h = height
         self._size = (self._w, self._h)
         self._root = os.path.split(os.path.realpath(__file__))[0] + os.sep
-        self._source = self._root + 'input' + os.sep + name + '.yuv'
-        self._output = self._root + 'output' + os.sep + name + '_'
+        if os.path.exists(name):
+            self._source = name
+            self._output = self._root + 'output' + os.sep + 'default_'
+        else:
+            self._source = self._root + 'input' + os.sep + name + '.yuv'
+            self._output = self._root + 'output' + os.sep + name + '_'
         self._encoder = YUVEncode(self._output)
 
     def get_output(self):
@@ -60,6 +65,7 @@ class YUVUtil(object):
             f1 = self._source
         if not os.path.exists(f1):
             f1 = self._output + f1
+        print f1
         subprocess.check_output(
             "ffmpeg " +
             " -pix_fmt yuv420p -s " +
@@ -147,6 +153,17 @@ class YUVEncode(object):
         self._root = os.path.split(os.path.realpath(__file__))[0] + os.sep
         pass
 
+    @staticmethod
+    def wait_proc(sp):
+        out = sp.stdout
+        while sp.poll() is None:
+            rl = out.readline()
+            if rl == '':
+                time.sleep(1)
+                continue
+            print rl.strip()
+        print sp.poll()
+
     def ffmpeg_h264(self, source, (w, h), output='sp.264'):
         output = self._output + output
         subprocess.check_output(
@@ -185,19 +202,13 @@ class YUVEncode(object):
         sp = subprocess.Popen(
             cmd, stdout=subprocess.PIPE,
             shell=True, stderr=subprocess.STDOUT)
-        out = sp.stdout
-        while True:
-            rl = out.readline()
-            if rl == '':
-                break
-            print rl.strip()
+        self.wait_proc(sp)
         return output
 
 
-class SVCEncode(object):
+class SVCEncode(YUVEncode):
     def __init__(self, output):
-        self._output = output
-        self._root = os.path.split(os.path.realpath(__file__))[0] + os.sep
+        super(SVCEncode, self).__init__(output)
         self._lib = self._root + 'lib' + os.sep
         pass
 
@@ -272,18 +283,12 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
     def jsvm_h264(self, source, (w, h), output='jsvm.264', f_rate=60, seg_len=3):
         """
         H264AVCEncoderLibTestStatic -pf config
-        H264AVCDecoderLibTestStatic 264 yuv
         """
         cmd = self._lib + 'H264AVCEncoderLibTestStatic -pf ' + self.jsvm_config(source, (w, h), output, f_rate, seg_len)
         sp = subprocess.Popen(
             cmd, stdout=subprocess.PIPE,
             shell=True, stderr=subprocess.STDOUT)
-        out = sp.stdout
-        while True:
-            rl = out.readline()
-            if rl == '':
-                break
-            print rl.strip()
+        self.wait_proc(sp)
         return self._output + output
 
     def demultiplex(self, source, output='', seg_len=30000000, f_rate=60):
@@ -293,10 +298,22 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
         sp = subprocess.Popen(
             cmd, stdout=subprocess.PIPE,
             shell=True, stderr=subprocess.STDOUT)
-        out = sp.stdout
-        while True:
-            rl = out.readline()
-            if rl == '':
-                break
-            print rl.strip()
+        self.wait_proc(sp)
         return cmd
+
+    def merge(self, source='jsvm', seg=0, l=3):
+        """
+        merge 264 init svc...
+        H264AVCDecoderLibTestStatic 264 yuv
+        """
+        source = self._output + source
+        cmd = self._lib + 'svc_merge.py '
+        cmd += source + '_rec.264 '
+        cmd += source + '.init.svc '
+        for i in range(l):
+            cmd += source + '.seg{0}-L{1}.svc '.format(seg, i)
+        sp = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE,
+            shell=True, stderr=subprocess.STDOUT)
+        self.wait_proc(sp)
+        return source + '_rec.264'
