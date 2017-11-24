@@ -9,6 +9,7 @@ class YUVEncode(object):
     def __init__(self, output):
         self._output = output
         self._root = os.path.split(os.path.realpath(__file__))[0] + os.sep
+        self._lib = self._root + '..' + os.sep + 'lib' + os.sep
         pass
 
     @staticmethod
@@ -25,7 +26,7 @@ class YUVEncode(object):
                 time.sleep(1)
                 continue
             print rl.strip()
-        print sp.poll()
+        assert sp.poll() == 0
         print cmd
         print '#' * 60
 
@@ -57,7 +58,7 @@ class YUVEncode(object):
         stats = self._output + 'stats.dat'
         rec = self._output + 'test_rec.yuv'
         leak = self._output + 'leakybucketparam.cfg'
-        cmd = self._root + 'lib' + os.sep + 'lencod ' + cmd.format(
+        cmd = self._lib + 'lencod ' + cmd.format(
             w, h, w, h, output, None, source, frm, gop, rate, f_rate, stats, rec, leak
         )
         self.wait_proc(cmd)

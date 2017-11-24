@@ -7,7 +7,6 @@ from jmenc import YUVEncode
 class SVCEncode(YUVEncode):
     def __init__(self, output):
         super(SVCEncode, self).__init__(output)
-        self._lib = self._root + 'lib' + os.sep
         pass
 
     def jsvm_config(self, source, (w, h), output='jsvm.264', f_rate=60, seg_len=3):

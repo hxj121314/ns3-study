@@ -11,7 +11,7 @@ class YUVUtil(object):
         self._w = width
         self._h = height
         self._size = (self._w, self._h)
-        self._root = os.path.split(os.path.realpath(__file__))[0] + os.sep
+        self._root = os.path.split(os.path.realpath(__file__))[0] + os.sep + '..' + os.sep
         if os.path.exists(name):
             self._source = name
             self._output = self._root + 'output' + os.sep + 'default_'
