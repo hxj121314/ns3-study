@@ -129,6 +129,7 @@ class YUVUtil(object):
         for j in range(0, self._h, h):
             for i in range(0, self._w, w):
                 ret = self.split_run((w, h), (i, j), "sp_{0}_{1}.yuv".format(x, y))
+                print 'MAKE', ret
                 data.append(ret)
                 y += 1
             y = 0

@@ -40,15 +40,23 @@ class Proto(object):
         for i in os.listdir(self._output):
             if i[0] != '.':
                 if not os.path.isdir(self._output + i):
+                    print 'RM', self._output + i
                     # os.remove(self._output + i)
                     pass
 
     def run(self):
-        enc = SVCEncode(self._util.get_output())
-        enc.de_multiplex('/Users/zhangxiaoyi/ns3-study/proto/media/../output/jsvm.264', seg_len=30)
-        ret = enc.merge(l=2)
-        self._util.comp_yuv(ret)
+        self._make_tile()
         pass
+
+    def _make_tile(self):
+        data = self._util.make_tile(self._tile)
+        enc = SVCEncode(self._util.get_output())
+        for i in data:
+            print i
+            if not os.path.exists(i + '.264'):
+                ret = enc.jsvm_h264(i, (352, 288), output=i + '.264', seg_len=3)
+                enc.de_multiplex(ret, seg_len=30)
+            ret = enc.merge(source=i, l=2)
 
     def result(self):
         ret = ProtoResult(

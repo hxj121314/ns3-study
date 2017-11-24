@@ -8,12 +8,11 @@ class SVCEncode(YUVEncode):
         super(SVCEncode, self).__init__(output)
         pass
 
-    def jsvm_config(self, source, (w, h), output='jsvm.264', f_rate=60, seg_len=3):
+    def jsvm_config(self, source, (w, h), output, f_rate=60, seg_len=3):
         main = self._output + 'main.cfg'
         l1 = self._output + 'l1.cfg'
         l2 = self._output + 'l2.cfg'
         l3 = self._output + 'l3.cfg'
-        output = self._output + output
 
         temp = """OutputFile {0} # Bitstream file
 FrameRate {1} # Maximum frame rate [Hz]
@@ -80,9 +79,11 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
         """
         H264AVCEncoderLibTestStatic -pf config
         """
+        if output[0] != '/':
+            output = self._output + output
         cmd = self._lib + 'H264AVCEncoderLibTestStatic -pf ' + self.jsvm_config(source, (w, h), output, f_rate, seg_len)
         self.wait_proc(cmd)
-        return self._output + output
+        return output
 
     def de_multiplex(self, source, output='', seg_len=30000000, f_rate=60):
         output = self._output + output
@@ -99,7 +100,8 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
         merge 264 init svc...
         """
         assert l > 0
-        source = self._output + source
+        if source[0] != '/':
+            source = self._output + source
         if l == 3:
             return self.jsvm_decode(source)
         cmd = self._lib + 'svc_merge.py '
