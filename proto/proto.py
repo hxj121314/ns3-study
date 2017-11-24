@@ -45,7 +45,7 @@ class Proto(object):
         yuv = YUVUtil(self._name)
 
         enc = SVCEncode(yuv.get_output())
-        ret = enc.jsvm_h264(self._root + 'input/container_cif.yuv', (352, 288),seg_len=60)
+        ret = enc.jsvm_h264(self._root + 'input/container_cif.yuv', (352, 288), seg_len=60)
         pass
 
     def _test_yuv(self):
