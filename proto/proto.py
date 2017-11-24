@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 #  -*- coding:utf-8 -*-
 import os
-from yuv import YUVUtil
+from yuv import YUVUtil, YUVEncode
 
 
 class ProtoResult(object):
@@ -48,7 +48,8 @@ class Proto(object):
         yuv = YUVUtil(self._name)
         tmp_size = (352, 288)
         ret = yuv.split_run(tmp_size, (0, 0))
-        self._ret['o'] = yuv.split_ffmpeg_h264(ret, tmp_size, 'sp.mp4')
+        enc = YUVEncode(yuv.get_output())
+        self._ret['o'] = enc.ffmpeg_h264(ret, tmp_size, 'sp.mp4')
         self._ret['ret'] = yuv.comp('sp.mp4')
         self._ret['o2'] = yuv.yuv_ffmpeg_h264('sp2.mp4')
         self._ret['ret2'] = yuv.comp('sp2.mp4')

@@ -14,6 +14,10 @@ class YUVUtil(object):
         self._root = os.path.split(os.path.realpath(__file__))[0] + os.sep
         self._source = self._root + 'input' + os.sep + name + '.yuv'
         self._output = self._root + 'output' + os.sep + name + '_'
+        self._encoder = YUVEncode(self._output)
+
+    def get_output(self):
+        return self._output
 
     def read420(self):
         with open(self._source, 'rb') as f:
@@ -33,19 +37,8 @@ class YUVUtil(object):
                 assert len(y[0]) == self._w
                 yield y, u, v
 
-    def split_ffmpeg_h264(self, source, (w, h), output='sp.264'):
-        output = self._output + output
-        subprocess.check_output(
-            "ffmpeg " +
-            " -f rawvideo -pix_fmt yuv420p -s:v " +
-            str(w) + "x" + str(h) + " -i " +
-            source +
-            " -r 25 -c:v libx264 " + output,
-            shell=True, stderr=subprocess.STDOUT)
-        return output
-
     def yuv_ffmpeg_h264(self, output='sp.264'):
-        return self.split_ffmpeg_h264(self._source, self._size, output)
+        return self._encoder.ffmpeg_h264(self._source, self._size, output)
 
     def comp(self, f1='sp.mp4'):
         f1 = self._output + f1
@@ -121,8 +114,50 @@ class YUVUtil(object):
         for j in range(0, self._h, h):
             for i in range(0, self._w, w):
                 ret = self.split_run((w, h), (i, j), "sp_{0}_{1}.yuv".format(x, y))
-                self.split_ffmpeg_h264(ret, (w, h), "sp_{0}_{1}.mp4".format(x, y))
+                self._encoder.ffmpeg_h264(ret, (w, h), "sp_{0}_{1}.mp4".format(x, y))
                 y += 1
             y = 0
             x += 1
         pass
+
+
+class YUVEncode(object):
+    def __init__(self, output):
+        self._output = output
+        self._root = os.path.split(os.path.realpath(__file__))[0] + os.sep
+        pass
+
+    def ffmpeg_h264(self, source, (w, h), output='sp.264'):
+        output = self._output + output
+        subprocess.check_output(
+            "ffmpeg " +
+            " -f rawvideo -pix_fmt yuv420p -s:v " +
+            str(w) + "x" + str(h) + " -i " +
+            source +
+            " -r 25 -c:v libx264 " + output,
+            shell=True, stderr=subprocess.STDOUT)
+        return output
+
+    def jm_h264(self, source, (w, h), output='jm.264', frm=300, gop=6, rate=30000000, f_rate=60):
+        """
+        ./lencod.exe 
+        -p OutFileMode=0 
+        -p InputFile=akiyo_qcif.yuv 
+        -p FramesToBeEncoded=30 
+        -p NumberBFrames=0 
+        -p IDRPeriod=6 
+        -p Bitrate=30000000 
+        -p RateControlEnable=1 
+        -p RCUpdateMode=3 
+        -p FrameRate=60
+        """
+        output = self._output + output
+        cmd = '-p SourceWidth={0} -p SourceHeight={1} -p OutputWidth={2} -p OutputHeight={3}' + \
+              '-p OutputFile={4} -p TraceFile={5} -p InputFile={6} -p FramesToBeEncoded={7}' + \
+              ' -p IDRPeriod={8} -p Bitrate={9} -p FrameRate={10}'.format(
+                  w, h, w, h, output, self._output + 'trace.txt', source, frm, gop, rate, f_rate
+              )
+        subprocess.check_output(
+            self._root + 'lencod ' + cmd,
+            shell=True, stderr=subprocess.STDOUT)
+        return output
