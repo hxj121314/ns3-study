@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 #  -*- coding:utf-8 -*-
 import os
-from yuv import YUVUtil, YUVEncode
+from yuv import YUVUtil, YUVEncode, SVCEncode
 
 
 class ProtoResult(object):
@@ -42,25 +42,30 @@ class Proto(object):
 
     def run(self):
         yuv = YUVUtil(self._name)
-        enc = YUVEncode(yuv.get_output())
-        enc.demultiplex('./input/container_cif.yuv')
+        enc = SVCEncode(yuv.get_output())
+        ret = enc.jsvm_h264(self._root + 'input/container_cif.yuv', (352, 288))
+        enc.demultiplex(ret)
         pass
 
     def _test_yuv(self):
         yuv = YUVUtil(self._name)
+        yuv.show_img()
+
         tmp_size = (352, 288)
         ret = yuv.split_run(tmp_size, (0, 0))
-        enc = YUVEncode(yuv.get_output())
-        self._ret['o'] = enc.ffmpeg_h264(ret, tmp_size, 'sp.mp4')
+
         self._ret['ret'] = yuv.comp('sp.mp4')
         self._ret['o2'] = yuv.yuv_ffmpeg_h264('sp2.mp4')
         self._ret['ret2'] = yuv.comp('sp2.mp4')
         self._ret['ret3'] = yuv.comp_yuv()
-        yuv.show_img()
 
-        yuv = YUVUtil(self._name)
         enc = YUVEncode(yuv.get_output())
+        self._ret['o'] = enc.ffmpeg_h264(ret, tmp_size, 'sp.mp4')
         enc.jm_h264('./input/container_cif.yuv', (352, 288))
+        
+        enc = SVCEncode(yuv.get_output())
+        ret = enc.jsvm_h264(self._root + 'input/container_cif.yuv', (352, 288))
+        enc.demultiplex(ret)
         pass
 
     def result(self):
