@@ -159,11 +159,11 @@ class YUVEncode(object):
         stats = self._output + 'stats.dat'
         rec = self._output + 'test_rec.yuv'
         leak = self._output + 'leakybucketparam.cfg'
-        cmd = cmd.format(
+        cmd = self._root + 'lencod ' + cmd.format(
             w, h, w, h, output, None, source, frm, gop, rate, f_rate, stats, rec, leak
         )
         sp = subprocess.Popen(
-            self._root + 'lencod ' + cmd, stdout=subprocess.PIPE,
+            cmd, stdout=subprocess.PIPE,
             shell=True, stderr=subprocess.STDOUT)
         out = sp.stdout
         while True:
@@ -172,3 +172,17 @@ class YUVEncode(object):
                 break
             print rl.strip()
         return output
+
+    def demultiplex(self, source, seg_len=30000000, f_rate=60):
+        cmd = self._root + 'lib' + os.sep + 'demultiplex.py {0} {1} {2} {3}'
+        cmd = cmd.format(source, seg_len, self._output, f_rate)
+        sp = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE,
+            shell=True, stderr=subprocess.STDOUT)
+        out = sp.stdout
+        while True:
+            rl = out.readline()
+            if rl == '':
+                break
+            print rl.strip()
+        return cmd
