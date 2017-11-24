@@ -32,6 +32,7 @@ class Proto(object):
         self._svc = svc
         self._ret = {}
         self.check_env()
+        self._util = YUVUtil(self._name)
         pass
 
     def check_env(self):
@@ -39,10 +40,13 @@ class Proto(object):
         for i in os.listdir(self._output):
             if i[0] != '.':
                 if not os.path.isdir(self._output + i):
-                    os.remove(self._output + i)
+                    # os.remove(self._output + i)
                     pass
 
     def run(self):
+        enc = SVCEncode(self._util.get_output())
+        ret = enc.merge(l=3)
+        self._util.comp_yuv(ret)
         pass
 
     def result(self):

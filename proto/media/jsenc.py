@@ -97,11 +97,22 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
         merge 264 init svc...
         H264AVCDecoderLibTestStatic 264 yuv
         """
+        assert l > 0
         source = self._output + source
+        if l == 3:
+            return self.jsvm_decode(source)
         cmd = self._lib + 'svc_merge.py '
         cmd += source + '_rec.264 '
         cmd += source + '.init.svc '
         for i in range(l):
             cmd += source + '.seg{0}-L{1}.svc '.format(seg, i)
         self.wait_proc(cmd)
-        return source + '_rec.264'
+        return self.jsvm_decode(source + '_rec')
+
+    def jsvm_decode(self, source):
+        cmd = self._lib + 'H264AVCDecoderLibTestStatic ' + source + '.264 ' + source + '.yuv '
+        try:
+            self.wait_proc(cmd)
+        except AssertionError:
+            pass
+        return source + '.yuv'
