@@ -48,14 +48,10 @@ class YUVUtil(object):
     def comp(self, f1='sp.mp4'):
         if not os.path.exists(f1):
             f1 = self._output + f1
-        subprocess.check_output(
-            "ffmpeg -i " +
-            f1 +
-            " -pix_fmt yuv420p -s " +
-            str(self._w) + "x" + str(self._h) + " -i " +
-            self._source +
-            " -filter_complex \"psnr='stats_file=" + f1 + ".log'\" -f null -",
-            shell=True, stderr=subprocess.STDOUT)
+        cmd = "ffmpeg -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
+              " -filter_complex \"psnr='stats_file={2}.log'\" -f null -"
+        cmd = cmd.format(self._w, self._h, f1, self._source)
+        self._encoder.wait_proc(cmd)
         with open(f1 + ".log") as f:
             content = f.readlines()
         return [i.strip() for i in content]
@@ -65,17 +61,10 @@ class YUVUtil(object):
             f1 = self._source
         if not os.path.exists(f1):
             f1 = self._output + f1
-        print f1
-        subprocess.check_output(
-            "ffmpeg " +
-            " -pix_fmt yuv420p -s " +
-            str(self._w) + "x" + str(self._h) + " -i " +
-            f1 +
-            " -pix_fmt yuv420p -s " +
-            str(self._w) + "x" + str(self._h) + " -i " +
-            self._source +
-            " -filter_complex \"psnr='stats_file=" + f1 + ".log'\" -f null -",
-            shell=True, stderr=subprocess.STDOUT)
+        cmd = "ffmpeg -pix_fmt yuv420p -s {0}x{1} -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
+              " -filter_complex \"psnr='stats_file={2}.log'\" -f null -"
+        cmd = cmd.format(self._w, self._h, f1, self._source)
+        self._encoder.wait_proc(cmd)
         with open(f1 + ".log") as f:
             content = f.readlines()
         return [i.strip() for i in content]
@@ -154,7 +143,12 @@ class YUVEncode(object):
         pass
 
     @staticmethod
-    def wait_proc(sp):
+    def wait_proc(cmd):
+        print '*' * 60
+        print cmd
+        sp = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE,
+            shell=True, stderr=subprocess.STDOUT)
         out = sp.stdout
         while sp.poll() is None:
             rl = out.readline()
@@ -163,16 +157,14 @@ class YUVEncode(object):
                 continue
             print rl.strip()
         print sp.poll()
+        print cmd
+        print '#' * 60
 
     def ffmpeg_h264(self, source, (w, h), output='sp.264'):
         output = self._output + output
-        subprocess.check_output(
-            "ffmpeg " +
-            " -f rawvideo -pix_fmt yuv420p -s:v " +
-            str(w) + "x" + str(h) + " -i " +
-            source +
-            " -r 25 -c:v libx264 " + output,
-            shell=True, stderr=subprocess.STDOUT)
+        cmd = "ffmpeg -f rawvideo -pix_fmt yuv420p -s:v {0}x{1} -i {2} -r 25 -c:v libx264 {3} -y"
+        cmd = cmd.format(w, h, source, output)
+        self.wait_proc(cmd)
         return output
 
     def jm_h264(self, source, (w, h), output='jm.264', frm=3, gop=6, rate=30000000, f_rate=60):
@@ -199,10 +191,7 @@ class YUVEncode(object):
         cmd = self._root + 'lib' + os.sep + 'lencod ' + cmd.format(
             w, h, w, h, output, None, source, frm, gop, rate, f_rate, stats, rec, leak
         )
-        sp = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE,
-            shell=True, stderr=subprocess.STDOUT)
-        self.wait_proc(sp)
+        self.wait_proc(cmd)
         return output
 
 
@@ -285,20 +274,14 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
         H264AVCEncoderLibTestStatic -pf config
         """
         cmd = self._lib + 'H264AVCEncoderLibTestStatic -pf ' + self.jsvm_config(source, (w, h), output, f_rate, seg_len)
-        sp = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE,
-            shell=True, stderr=subprocess.STDOUT)
-        self.wait_proc(sp)
+        self.wait_proc(cmd)
         return self._output + output
 
     def demultiplex(self, source, output='', seg_len=30000000, f_rate=60):
         output = self._output + output
         cmd = self._lib + 'demultiplex.py {0} {1} {2} {3}'
         cmd = cmd.format(source, seg_len, output, f_rate)
-        sp = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE,
-            shell=True, stderr=subprocess.STDOUT)
-        self.wait_proc(sp)
+        self.wait_proc(cmd)
         return cmd
 
     def merge(self, source='jsvm', seg=0, l=3):
@@ -312,8 +295,5 @@ MeQP5               23             # QP for mot. est. / mode decision (stage 5)
         cmd += source + '.init.svc '
         for i in range(l):
             cmd += source + '.seg{0}-L{1}.svc '.format(seg, i)
-        sp = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE,
-            shell=True, stderr=subprocess.STDOUT)
-        self.wait_proc(sp)
+        self.wait_proc(cmd)
         return source + '_rec.264'
