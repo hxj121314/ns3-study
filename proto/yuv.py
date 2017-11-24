@@ -162,7 +162,13 @@ class YUVEncode(object):
         cmd = cmd.format(
             w, h, w, h, output, None, source, frm, gop, rate, f_rate, stats, rec, leak
         )
-        subprocess.check_output(
-            self._root + 'lencod ' + cmd,
+        sp = subprocess.Popen(
+            self._root + 'lencod ' + cmd, stdout=subprocess.PIPE,
             shell=True, stderr=subprocess.STDOUT)
+        out = sp.stdout
+        while True:
+            rl = out.readline()
+            if rl == '':
+                break
+            print rl.strip()
         return output
