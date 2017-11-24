@@ -41,9 +41,29 @@ class YUVUtil(object):
         return self._encoder.ffmpeg_h264(self._source, self._size, output)
 
     def comp(self, f1='sp.mp4'):
-        f1 = self._output + f1
+        if not os.path.exists(f1):
+            f1 = self._output + f1
         subprocess.check_output(
             "ffmpeg -i " +
+            f1 +
+            " -pix_fmt yuv420p -s " +
+            str(self._w) + "x" + str(self._h) + " -i " +
+            self._source +
+            " -filter_complex \"psnr='stats_file=" + f1 + ".log'\" -f null -",
+            shell=True, stderr=subprocess.STDOUT)
+        with open(f1 + ".log") as f:
+            content = f.readlines()
+        return [i.strip() for i in content]
+
+    def comp_yuv(self, f1=None):
+        if f1 is None:
+            f1 = self._source
+        if not os.path.exists(f1):
+            f1 = self._output + f1
+        subprocess.check_output(
+            "ffmpeg " +
+            " -pix_fmt yuv420p -s " +
+            str(self._w) + "x" + str(self._h) + " -i " +
             f1 +
             " -pix_fmt yuv420p -s " +
             str(self._w) + "x" + str(self._h) + " -i " +
@@ -172,6 +192,74 @@ class YUVEncode(object):
                 break
             print rl.strip()
         return output
+
+    def jsvm_h264(self):
+        """
+OutputFile              TOS-1080p.264   # Bitstream file
+FrameRate               24.0       # Maximum frame rate [Hz]
+FramesToBeEncoded      17620 # Number of frames 
+BaseLayerMode		2
+IntraPeriod            48          # Intra Period
+GOPSize                 4          # GOP Size (at maximum frame rate)
+SearchMode		4
+SearchRange		32
+FastBiSearch    1
+NumLayers		3
+LayerCfg		layer2_snr0.cfg
+LayerCfg		layer2_snr1.cfg
+LayerCfg		layer2_snr2.cfg
+
+
+InputFile            TOS_1080p.yuv      # Input  file
+SourceWidth          1920           # Input  frame width
+SourceHeight         1080           # Input  frame height
+FrameRateIn          24            # Input  frame rate [Hz]
+FrameRateOut         24            # Output frame rate [Hz]
+IDRPeriod           48
+QP                  30             # Quantization parameters
+MeQP0               30             # QP for mot. est. / mode decision (stage 0)
+MeQP1               30             # QP for mot. est. / mode decision (stage 1)
+MeQP2               30             # QP for mot. est. / mode decision (stage 2)
+MeQP3               30             # QP for mot. est. / mode decision (stage 3)
+MeQP4               30             # QP for mot. est. / mode decision (stage 4)
+MeQP5               30             # QP for mot. est. / mode decision (stage 5)
+
+
+InputFile            TOS_1080p.yuv      # Input  file
+SourceWidth          1920           # Input  frame width
+SourceHeight         1080           # Input  frame height
+FrameRateIn          24            # Input  frame rate [Hz]
+FrameRateOut         24            # Output frame rate [Hz]
+IDRPeriod           48
+InterLayerPred      1              # Inter-layer Pred. (0: no, 1: yes, 2:adap.)
+QP                  26             # Quantization parameters
+MeQP0               26             # QP for mot. est. / mode decision (stage 0)
+MeQP1               26             # QP for mot. est. / mode decision (stage 1)
+MeQP2               26             # QP for mot. est. / mode decision (stage 2)
+MeQP3               26             # QP for mot. est. / mode decision (stage 3)
+MeQP4               26             # QP for mot. est. / mode decision (stage 4)
+MeQP5               26             # QP for mot. est. / mode decision (stage 5)
+
+
+InputFile            TOS_1080p.yuv      # Input  file
+SourceWidth          1920           # Input  frame width
+SourceHeight         1080           # Input  frame height
+FrameRateIn          24            # Input  frame rate [Hz]
+FrameRateOut         24            # Output frame rate [Hz]
+IDRPeriod           48
+InterLayerPred      1              # Inter-layer Pred. (0: no, 1: yes, 2:adap.)
+QP                  23             # Quantization parameters
+MeQP0               23             # QP for mot. est. / mode decision (stage 0)
+MeQP1               23             # QP for mot. est. / mode decision (stage 1)
+MeQP2               23             # QP for mot. est. / mode decision (stage 2)
+MeQP3               23             # QP for mot. est. / mode decision (stage 3)
+MeQP4               23             # QP for mot. est. / mode decision (stage 4)
+MeQP5               23             # QP for mot. est. / mode decision (stage 5)
+
+H264AVCEncoderLibTestStatic -pf config
+H264AVCDecoderLibTestStatic 264 yuv
+        """
+        pass
 
     def demultiplex(self, source, seg_len=30000000, f_rate=60):
         cmd = self._root + 'lib' + os.sep + 'demultiplex.py {0} {1} {2} {3}'

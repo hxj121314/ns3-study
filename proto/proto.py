@@ -43,6 +43,7 @@ class Proto(object):
     def run(self):
         yuv = YUVUtil(self._name)
         enc = YUVEncode(yuv.get_output())
+        self._ret['ret2'] = yuv.comp_yuv()
         enc.demultiplex('./input/container_cif.yuv')
         pass
 
