@@ -37,12 +37,13 @@ class Proto(object):
         assert os.path.exists(self._source)
         for i in os.listdir(self._output):
             if i[0] != '.':
-                os.remove(self._output + i)
+                if not os.path.isdir(self._output + i):
+                    os.remove(self._output + i)
 
     def run(self):
         yuv = YUVUtil(self._name)
         enc = YUVEncode(yuv.get_output())
-        enc.jm_h264('./input/container_cif.yuv', (352, 288))
+        enc.demultiplex('./input/container_cif.yuv')
         pass
 
     def _test_yuv(self):
@@ -55,6 +56,10 @@ class Proto(object):
         self._ret['o2'] = yuv.yuv_ffmpeg_h264('sp2.mp4')
         self._ret['ret2'] = yuv.comp('sp2.mp4')
         yuv.show_img()
+
+        yuv = YUVUtil(self._name)
+        enc = YUVEncode(yuv.get_output())
+        enc.jm_h264('./input/container_cif.yuv', (352, 288))
         pass
 
     def result(self):
