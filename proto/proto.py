@@ -43,7 +43,6 @@ class Proto(object):
     def run(self):
         yuv = YUVUtil(self._name)
         enc = YUVEncode(yuv.get_output())
-        self._ret['ret2'] = yuv.comp_yuv()
         enc.demultiplex('./input/container_cif.yuv')
         pass
 
@@ -56,6 +55,7 @@ class Proto(object):
         self._ret['ret'] = yuv.comp('sp.mp4')
         self._ret['o2'] = yuv.yuv_ffmpeg_h264('sp2.mp4')
         self._ret['ret2'] = yuv.comp('sp2.mp4')
+        self._ret['ret3'] = yuv.comp_yuv()
         yuv.show_img()
 
         yuv = YUVUtil(self._name)
