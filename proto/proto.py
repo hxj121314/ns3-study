@@ -1,7 +1,6 @@
 #!/usr/bin/env python2.7
 #  -*- coding:utf-8 -*-
 import os
-import math
 
 from media import *
 from trans import *

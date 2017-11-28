@@ -68,8 +68,9 @@ class CheckFile(object):
         return self._amount
 
     def _get_quality_sim(self, seg=0, (w, h)=(0, 0), layer=1):
-        return random.normalvariate(38, 0.5) + (layer - 1) * 3
+        return random.normalvariate(35, 1) + (layer - 1) * 3
 
     def _get_amount_sim(self, seg=0, (w, h)=(0, 0), layer=1):
-        k = 1024 * 8
-        return random.normalvariate(130 * k, 20 * k) + (layer - 1) * 60 * k
+        k = 1024
+        m = 1024 * k
+        return random.normalvariate(5 * m, 600 * k) + (layer - 1) * 2 * m
