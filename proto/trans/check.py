@@ -33,6 +33,7 @@ class CheckFile(object):
                 pickle.dump(self._amount, f)
         print self._quality.shape
         print self._amount.shape
+        return self._quality, self._amount
 
     def _get_quality(self):
         """

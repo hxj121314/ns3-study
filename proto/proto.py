@@ -47,7 +47,7 @@ class Proto(object):
 
     def run(self):
         cf = CheckFile(self._name, self._seg_len, self._tile, self._output)
-        cf.check()
+        q, a = cf.check()
         pass
 
     def _make_tile(self):
