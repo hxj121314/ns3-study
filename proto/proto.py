@@ -48,6 +48,8 @@ class Proto(object):
     def run(self):
         cf = CheckFile(self._name, self._seg_len, self._tile, self._output)
         q, a = cf.check()
+        s = Sim(q, a, self._tile)
+        s.run()
         pass
 
     def _make_tile(self):
