@@ -46,7 +46,7 @@ class Proto(object):
                     pass
 
     def run(self):
-        cf = CheckFile(10, (4, 4))
+        cf = CheckFile(self._name, self._seg_len, self._tile, self._output)
         cf.check()
         pass
 
