@@ -3,6 +3,7 @@
 import os
 
 from media import *
+from trans import *
 
 
 class ProtoResult(object):
@@ -45,7 +46,8 @@ class Proto(object):
                     pass
 
     def run(self):
-        self._make_tile()
+        cf = CheckFile(10, (4, 4))
+        cf.check()
         pass
 
     def _make_tile(self):
