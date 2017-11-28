@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 #  -*- coding:utf-8 -*-
 import os
+import math
 
 from media import *
 from trans import *
@@ -48,8 +49,10 @@ class Proto(object):
     def run(self):
         cf = CheckFile(self._name, self._seg_len, self._tile, self._output)
         q, a = cf.check()
-        s = Sim(q, a, self._tile)
-        s.run()
+        for i in range(1, 30):
+            s = Sim(q, a, self._tile, i)
+            ret = s.run()
+            print i, sum(ret) / len(ret)
         pass
 
     def _make_tile(self):
