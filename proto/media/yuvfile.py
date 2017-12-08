@@ -48,12 +48,10 @@ class YUVUtil(object):
         if not os.path.exists(f1):
             f1 = self._output + f1
         cmd = "ffmpeg -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
-              " -filter_complex \"psnr='stats_file={2}.log'\" -f null -"
+              " -filter_complex \"ssim='stats_file={2}_ssim.log';[0:v][1:v]psnr='stats_file={2}_psnr.log'\" -f null -"
         cmd = cmd.format(self._w, self._h, f1, self._source)
         self._encoder.wait_proc(cmd)
-        with open(f1 + ".log") as f:
-            content = f.readlines()
-        return [i.strip() for i in content]
+        return self.read_log(f1)
 
     def comp_yuv(self, f1=None):
         if f1 is None:
@@ -61,12 +59,17 @@ class YUVUtil(object):
         if not os.path.exists(f1):
             f1 = self._output + f1
         cmd = "ffmpeg -pix_fmt yuv420p -s {0}x{1} -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
-              " -filter_complex \"psnr='stats_file={2}.log'\" -f null -"
+              " -filter_complex \"ssim='stats_file={2}_ssim.log';psnr='stats_file={2}_psnr.log'\" -f null -"
         cmd = cmd.format(self._w, self._h, f1, self._source)
         self._encoder.wait_proc(cmd)
-        with open(f1 + ".log") as f:
-            content = f.readlines()
-        return [i.strip() for i in content]
+        return self.read_log(f1)
+
+    def read_log(self, f1):
+        with open(f1 + "_ssim.log") as f:
+            c1 = f.readlines()
+        with open(f1 + "_psnr.log") as f:
+            c2 = f.readlines()
+        return [i.strip() for i in c1], [i.strip() for i in c2]
 
     @staticmethod
     def yuv2rgb((y, u, v)):
