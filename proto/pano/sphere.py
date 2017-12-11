@@ -66,11 +66,12 @@ class Sphere(object):
         glutSwapBuffers()
         return buf
 
-    def output(self, d, subd):
+    def output(self, d, sub_d, save=False):
         for k, vec in d.iteritems():
             buf = self.draw_sphere(*vec)
             image = Image.frombytes(mode="RGB", size=(self._w, self._h), data=buf)
-            # image.save(subd + "/%s.jpg" % k)
+            if save:
+                image.save(sub_d + "/%s.jpg" % k)
             image.show()
 
     def _read_texture(self, filename):
