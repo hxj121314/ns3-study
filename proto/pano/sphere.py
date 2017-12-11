@@ -61,11 +61,17 @@ class Sphere(object):
         glDisable(GL_TEXTURE_2D)
 
         buf = glReadPixels(0, 0, self._w, self._h, GL_RGB, GL_UNSIGNED_BYTE)
-        image = Image.frombytes(mode="RGB", size=(self._w, self._h), data=buf)
-        image.show()
 
         glPopMatrix()
         glutSwapBuffers()
+        return buf
+
+    def output(self, d, subd):
+        for k, vec in d.iteritems():
+            buf = self.draw_sphere(*vec)
+            image = Image.frombytes(mode="RGB", size=(self._w, self._h), data=buf)
+            # image.save(subd + "/%s.jpg" % k)
+            image.show()
 
     def _read_texture(self, filename):
         img = Image.open(filename)
@@ -79,6 +85,17 @@ class Sphere(object):
         self._texture_id = texture_id
 
 
-if __name__ == '__main__':
+def _test():
     s = Sphere((600, 300))
-    s.draw_sphere()
+    s.output({
+        'top': (180, 180, 0),
+        'bottom': (0, 180, 0),
+        'front': (90, 180, 0),
+        'left': (90, 180, 90),
+        'back': (90, 180, 180),
+        'right': (90, 180, 270),
+    }, os.path.dirname(os.path.realpath(__file__)))
+
+
+if __name__ == '__main__':
+    _test()
