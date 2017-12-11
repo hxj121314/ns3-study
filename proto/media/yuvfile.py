@@ -64,23 +64,13 @@ class YUVUtil(object):
         self._encoder.wait_proc(cmd)
         return self.read_log(f1)
 
-    def read_log(self, f1):
+    @staticmethod
+    def read_log(f1):
         with open(f1 + "_ssim.log") as f:
             c1 = f.readlines()
         with open(f1 + "_psnr.log") as f:
             c2 = f.readlines()
         return [i.strip() for i in c1], [i.strip() for i in c2]
-
-    @staticmethod
-    def yuv2rgb((y, u, v)):
-        u = np.repeat(u, 2, 0)
-        u = np.repeat(u, 2, 1)
-        v = np.repeat(v, 2, 0)
-        v = np.repeat(v, 2, 1)
-        r = y + 1.14 * (v - 128.0)
-        g = y - 0.395 * (u - 128.0) - 0.581 * (v - 128.0)
-        b = y + 2.032 * (u - 128.0)
-        return r.astype(np.uint8), g.astype(np.uint8), b.astype(np.uint8)
 
     def rgb2img(self, (r, g, b)):
         im_r = Image.frombytes('L', self._size, r.tostring())
@@ -88,8 +78,15 @@ class YUVUtil(object):
         im_b = Image.frombytes('L', self._size, b.tostring())
         return Image.merge('RGB', (im_r, im_g, im_b))
 
-    def yuv2img(self, yuv):
-        return self.rgb2img(self.yuv2rgb(yuv))
+    def yuv2img(self, (y, u, v)):
+        u = np.repeat(u, 2, 0)
+        u = np.repeat(u, 2, 1)
+        v = np.repeat(v, 2, 0)
+        v = np.repeat(v, 2, 1)
+        im_r = Image.frombytes('L', self._size, y.tostring())
+        im_g = Image.frombytes('L', self._size, u.tostring())
+        im_b = Image.frombytes('L', self._size, v.tostring())
+        return Image.merge('YCbCr', (im_r, im_g, im_b))
 
     def yuv_split(self, (y, u, v), (w, h), (off_w, off_h)):
         assert w + off_w <= self._w
@@ -104,6 +101,12 @@ class YUVUtil(object):
         u = u[::2, ::2]
         v = v[::2, ::2]
         return y, u, v
+
+    def img2yuv(self):
+        pass
+
+    def yuv_merge(self):
+        pass
 
     def show_img(self):
         index = 0
