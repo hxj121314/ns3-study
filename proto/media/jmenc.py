@@ -13,9 +13,8 @@ class YUVEncode(object):
         pass
 
     @staticmethod
-    def wait_proc(cmd):
-        print '*' * 60
-        print cmd
+    def wait_proc(cmd, log=False):
+        std_out = ['*' * 60, cmd]
         sp = subprocess.Popen(
             cmd, stdout=subprocess.PIPE,
             shell=True, stderr=subprocess.STDOUT)
@@ -26,11 +25,14 @@ class YUVEncode(object):
             if rl == '':
                 time.sleep(1)
                 continue
-            print rl.strip()
+            std_out.append(rl.strip())
             rl_list.append(rl.strip())
+        std_out.append(cmd)
+        std_out.append('#' * 60)
+        if log or sp.poll() != 0:
+            for i in std_out:
+                print i
         assert sp.poll() == 0
-        print cmd
-        print '#' * 60
         return rl_list
 
     def ffmpeg_h264(self, source, (w, h), output='sp.264'):
@@ -82,4 +84,4 @@ class YUVEncode(object):
             w, h, w, h, output, None, source, frm, gop, rate, f_rate, stats, rec, leak
         )
         self.wait_proc(cmd)
-        return output,rec
+        return output, rec

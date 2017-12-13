@@ -30,7 +30,7 @@ def test_comp():
         p, s = yuv.comp_yuv(base)
         p2, s2 = yuv2.comp_yuv(base)
         ret_list.append(','.join([str(i) for i in (size, p, s, p2, s2)]) + '\n')
-        break
+        print ret_list[-1]
     with open(yuv.get_output() + '123.csv', 'w') as f:
         f.writelines(ret_list)
 
@@ -67,5 +67,5 @@ def main():
 
 if __name__ == '__main__':
     main()
-    issue()
+    test_comp()
     pass
