@@ -48,7 +48,7 @@ class FFComp(object):
         assert os.path.exists(source)
         assert os.path.exists(f1)
         cmd = "ffmpeg -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
-              " -filter_complex \"ssim='stats_file={2}_ssim.log';[0:v][1:v]psnr='stats_file={2}_psnr.log'\" -f null -"
+              " -filter_complex \"ssim='stats_file={3}_ssim.log';[0:v][1:v]psnr='stats_file={3}_psnr.log'\" -f null -"
         cmd = cmd.format(w, h, source, f1)
         self._encoder.wait_proc(cmd)
         return self.read_log(f1)
@@ -57,7 +57,7 @@ class FFComp(object):
         assert os.path.exists(source)
         assert os.path.exists(f1)
         cmd = "ffmpeg -pix_fmt yuv420p -s {0}x{1} -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
-              " -filter_complex \"ssim='stats_file={2}_ssim.log';[0:v][1:v]psnr='stats_file={2}_psnr.log'\" -f null -"
+              " -filter_complex \"ssim='stats_file={3}_ssim.log';[0:v][1:v]psnr='stats_file={3}_psnr.log'\" -f null -"
         cmd = cmd.format(w, h, source, f1)
         self._encoder.wait_proc(cmd)
         return self.read_log(f1)

@@ -12,7 +12,7 @@ def test_comp():
 
     enc = YUVEncode(yuv.get_output())
     ret_list = []
-    frm = 12
+    frm = 60
     for i in range(10, 40, 2):
         ret, base = enc.jm_h264(yuv.get_source(), (1280, 720), rate=i * 100000, f_rate=25, frm=frm)
         size = os.path.getsize(ret)
