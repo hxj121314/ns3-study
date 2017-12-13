@@ -5,22 +5,28 @@ from proto import Proto
 from media import *
 
 
-def test_yuv():
+def test_comp():
     s = 'container_cif'
     yuv = YUVUtil(s)
 
-    tmp_size = (352, 288)
-    ret = yuv.split_run(tmp_size, (0, 0))
+    enc = YUVEncode(yuv.get_output())
+    ret = enc.jm_h264('./input/container_cif.yuv', (352, 288))
+    print yuv.comp(ret)
+    print yuv.comp_yuv()
+
+
+def test_yuv():
+    s = 'container_cif'
+    yuv = YUVUtil(s)
+    yuv.show_img()
 
     enc = YUVEncode(yuv.get_output())
-    print enc.ffmpeg_h264(ret, tmp_size, s + '_sp.mp4')
-    print yuv.comp('sp.mp4')
-    print yuv.yuv_ffmpeg_h264('sp2.mp4')
-    print yuv.comp('sp2.mp4')
-    print yuv.comp_yuv()
-    yuv.show_img()
     enc.jm_h264('./input/container_cif.yuv', (352, 288))
 
+
+def test_jsvm():
+    s = 'container_cif'
+    yuv = YUVUtil(s)
     enc = SVCEncode(yuv.get_output())
     ret = enc.jsvm_h264(os.path.split(os.path.realpath(__file__))[0] + os.sep + 'input/container_cif.yuv', (352, 288))
     enc.de_multiplex(ret)
@@ -41,5 +47,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    test_comp()
     pass

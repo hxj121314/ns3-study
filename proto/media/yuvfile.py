@@ -6,8 +6,35 @@ import os
 from jmenc import YUVEncode
 
 
+class FFComp(object):
+    def __init__(self, enc):
+        self._encoder = enc
+
+    def comp(self, w, h, source, f1):
+        cmd = "ffmpeg -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
+              " -filter_complex \"ssim='stats_file={2}_ssim.log';[0:v][1:v]psnr='stats_file={2}_psnr.log'\" -f null -"
+        cmd = cmd.format(w, h, f1, source)
+        self._encoder.wait_proc(cmd)
+        return self.read_log(f1)
+
+    def comp_yuv(self, w, h, source, f1):
+        cmd = "ffmpeg -pix_fmt yuv420p -s {0}x{1} -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
+              " -filter_complex \"ssim='stats_file={2}_ssim.log';[0:v][1:v]psnr='stats_file={2}_psnr.log'\" -f null -"
+        cmd = cmd.format(w, h, f1, source)
+        self._encoder.wait_proc(cmd)
+        return self.read_log(f1)
+
+    @staticmethod
+    def read_log(f1):
+        with open(f1 + "_ssim.log") as f:
+            c1 = f.readlines()
+        with open(f1 + "_psnr.log") as f:
+            c2 = f.readlines()
+        return [i.strip() for i in c1], [i.strip() for i in c2]
+
+
 class YUVUtil(object):
-    def __init__(self, name, width=352, height=288):
+    def __init__(self, name, width=352, height=288, comp=FFComp):
         self._w = width
         self._h = height
         self._size = (self._w, self._h)
@@ -19,6 +46,7 @@ class YUVUtil(object):
             self._source = self._root + 'input' + os.sep + name + '.yuv'
             self._output = self._root + 'output' + os.sep + name + '_'
         self._encoder = YUVEncode(self._output)
+        self._comp = comp(self._encoder)
 
     def get_output(self):
         return self._root + 'output' + os.sep
@@ -47,30 +75,14 @@ class YUVUtil(object):
     def comp(self, f1='sp.mp4'):
         if not os.path.exists(f1):
             f1 = self._output + f1
-        cmd = "ffmpeg -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
-              " -filter_complex \"ssim='stats_file={2}_ssim.log';[0:v][1:v]psnr='stats_file={2}_psnr.log'\" -f null -"
-        cmd = cmd.format(self._w, self._h, f1, self._source)
-        self._encoder.wait_proc(cmd)
-        return self.read_log(f1)
+        return self._comp.comp(self._w, self._h, self._source, f1)
 
     def comp_yuv(self, f1=None):
         if f1 is None:
             f1 = self._source
         if not os.path.exists(f1):
             f1 = self._output + f1
-        cmd = "ffmpeg -pix_fmt yuv420p -s {0}x{1} -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
-              " -filter_complex \"ssim='stats_file={2}_ssim.log';psnr='stats_file={2}_psnr.log'\" -f null -"
-        cmd = cmd.format(self._w, self._h, f1, self._source)
-        self._encoder.wait_proc(cmd)
-        return self.read_log(f1)
-
-    @staticmethod
-    def read_log(f1):
-        with open(f1 + "_ssim.log") as f:
-            c1 = f.readlines()
-        with open(f1 + "_psnr.log") as f:
-            c2 = f.readlines()
-        return [i.strip() for i in c1], [i.strip() for i in c2]
+        return self._comp.comp_yuv(self._w, self._h, self._source, f1)
 
     def rgb2img(self, (r, g, b)):
         im_r = Image.frombytes('L', self._size, r.tostring())
