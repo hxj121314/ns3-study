@@ -60,7 +60,9 @@ class FFComp(object):
             c1 = f.readlines()
         with open(f1 + "_psnr.log") as f:
             c2 = f.readlines()
-        return [i.strip() for i in c1], [i.strip() for i in c2]
+        ssim, psnr = np.mean([float(i.strip().split('All:')[1].split()[0]) for i in c1]), \
+                     np.mean([float(i.strip().split('psnr_avg:')[1].split()[0]) for i in c2])
+        return psnr, ssim
 
 
 class YUVUtil(object):
@@ -79,7 +81,10 @@ class YUVUtil(object):
         self._comp = comp(self._encoder)
 
     def get_output(self):
-        return self._root + 'output' + os.sep
+        return os.sep.join(self._output.split(os.sep)[:-1]) + os.sep
+
+    def get_source(self):
+        return self._source
 
     def read420(self):
         with open(self._source, 'rb') as f:

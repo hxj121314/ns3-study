@@ -49,7 +49,7 @@ class YUVEncode(object):
         self.wait_proc(cmd)
         return output
 
-    def jm_h264(self, source, (w, h), output='jm.264', frm=3, gop=6, rate=30000000, f_rate=60):
+    def jm_h264(self, source, (w, h), output='jm.264', frm=3, gop=6, rate=30000000, f_rate=60):  # 30Mbps
         """
         ./lencod.exe 
         -p OutFileMode=0 
