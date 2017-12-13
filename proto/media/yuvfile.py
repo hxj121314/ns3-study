@@ -48,7 +48,7 @@ class FFComp(object):
         assert os.path.exists(source)
         assert os.path.exists(f1)
         cmd = "ffmpeg -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
-              " -filter_complex \"ssim='stats_file={3}_ssim.log';[0:v][1:v]psnr='stats_file={3}_psnr.log'\" -f null -"
+              " -lavfi \"ssim='stats_file={3}_ssim.log';[0:v][1:v]psnr='stats_file={3}_psnr.log'\" -f null -"
         cmd = cmd.format(w, h, source, f1)
         self._encoder.wait_proc(cmd)
         return self.read_log(f1)
@@ -56,8 +56,8 @@ class FFComp(object):
     def comp_yuv(self, w, h, source, f1):
         assert os.path.exists(source)
         assert os.path.exists(f1)
-        cmd = "ffmpeg -pix_fmt yuv420p -s {0}x{1} -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
-              " -filter_complex \"ssim='stats_file={3}_ssim.log';[0:v][1:v]psnr='stats_file={3}_psnr.log'\" -f null -"
+        cmd = "ffmpeg -s {0}x{1} -i {2} -s {0}x{1} -i {3}" + \
+              " -lavfi \"ssim='stats_file={3}_ssim.log';[0:v][1:v]psnr='stats_file={3}_psnr.log'\" -f null -"
         cmd = cmd.format(w, h, source, f1)
         self._encoder.wait_proc(cmd)
         return self.read_log(f1)
@@ -68,8 +68,10 @@ class FFComp(object):
             c1 = f.readlines()
         with open(f1 + "_psnr.log") as f:
             c2 = f.readlines()
-        ssim, psnr = np.mean([float(i.strip().split('All:')[1].split()[0]) for i in c1]), \
-                     np.mean([float(i.strip().split('psnr_avg:')[1].split()[0]) for i in c2])
+        ssim, psnr = [float(i.strip().split('All:')[1].split()[0]) for i in c1], \
+                     [float(i.strip().split('psnr_y:')[1].split()[0]) for i in c2]
+        psnr = np.mean(psnr)
+        ssim = np.mean(ssim)
         return psnr, ssim
 
 

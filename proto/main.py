@@ -5,6 +5,16 @@ from proto import Proto
 from media import *
 
 
+def issue():
+    s = 'ref'
+    yuv = YUVUtil(s, width=832, height=480, comp=VmafComp)
+    yuv2 = YUVUtil(s, width=832, height=480)
+    base = './input/dis.yuv'
+    p, s = yuv.comp_yuv(base)
+    p2, s2 = yuv2.comp_yuv(base)
+    print p, p2, s, s2
+
+
 def test_comp():
     s = 'jWbLLKdO7k4'
     yuv = YUVUtil(s, width=1280, height=720, comp=VmafComp)
@@ -57,5 +67,5 @@ def main():
 
 if __name__ == '__main__':
     main()
-    test_comp()
+    issue()
     pass
