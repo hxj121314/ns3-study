@@ -6,6 +6,36 @@ import os
 from jmenc import YUVEncode
 
 
+class VmafComp(object):
+    def __init__(self, enc):
+        self._encoder = enc
+        self._root = os.path.split(os.path.realpath(__file__))[0] + os.sep
+        self._lib = self._root + '..' + os.sep + 'lib' + os.sep
+
+    def comp(self, w, h, source, f1):
+        pass
+
+    def comp_yuv(self, w, h, source, f1):
+        cmd = self._lib + "psnr yuv420p {2} {3} {0} {1} --out-fmt json"
+        cmd = cmd.format(w, h, f1, source)
+        ret = self._encoder.wait_proc(cmd)
+        avg = []
+        for i in ret:
+            i = i.strip().split()[-1]
+            avg.append(float(i))
+        avg = np.mean(avg)
+        cmd = self._lib + "ssim yuv420p {2} {3} {0} {1} --out-fmt json"
+        cmd = cmd.format(w, h, f1, source)
+        ret = self._encoder.wait_proc(cmd)
+        avg2 = []
+        for i in ret:
+            i = i.strip().split()
+            if i[0] == 'ssim:':
+                avg2.append(float(i[-1]))
+        avg2 = np.mean(avg2)
+        return avg, avg2
+
+
 class FFComp(object):
     def __init__(self, enc):
         self._encoder = enc

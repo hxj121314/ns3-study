@@ -42,7 +42,7 @@ class Proto(object):
             if i[0] != '.':
                 if not os.path.isdir(self._output + i):
                     print 'RM', self._output + i
-                    # os.remove(self._output + i)
+                    os.remove(self._output + i)
                     pass
 
     def run(self):

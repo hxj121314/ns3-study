@@ -7,12 +7,13 @@ from media import *
 
 def test_comp():
     s = 'container_cif'
-    yuv = YUVUtil(s)
+    yuv = YUVUtil(s, comp=VmafComp)
 
     enc = YUVEncode(yuv.get_output())
     ret = enc.jm_h264('./input/container_cif.yuv', (352, 288))
-    print yuv.comp(ret)
-    print yuv.comp_yuv()
+    out = enc.jm_yuv(ret, './input/container_cif.yuv', '123.yuv')
+    ret = yuv.comp_yuv(out)
+    print ret
 
 
 def test_yuv():
@@ -41,11 +42,11 @@ def main():
     tile = (4, 4)
     svc = 3
     p = Proto(source, seg_len, tile, svc)
-    p.run()
-    print p.result()
-    pass
+    # p.run()
+    # print p.result()
 
 
 if __name__ == '__main__':
+    main()
     test_comp()
     pass

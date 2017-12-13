@@ -20,20 +20,32 @@ class YUVEncode(object):
             cmd, stdout=subprocess.PIPE,
             shell=True, stderr=subprocess.STDOUT)
         out = sp.stdout
+        rl_list = []
         while sp.poll() is None:
             rl = out.readline()
             if rl == '':
                 time.sleep(1)
                 continue
             print rl.strip()
+            rl_list.append(rl.strip())
         assert sp.poll() == 0
         print cmd
         print '#' * 60
+        return rl_list
 
     def ffmpeg_h264(self, source, (w, h), output='sp.264'):
         output = self._output + output
         cmd = "ffmpeg -f rawvideo -pix_fmt yuv420p -s:v {0}x{1} -i {2} -r 25 -c:v libx264 {3} -y"
         cmd = cmd.format(w, h, source, output)
+        self.wait_proc(cmd)
+        return output
+
+    def jm_yuv(self, in_file, ref_file, output):
+        assert os.path.exists(in_file)
+        assert os.path.exists(ref_file)
+        output = self._output + output
+        cmd = '-p InputFile={0} -p OutputFile={1} -p RefFile={2}'
+        cmd = self._lib + 'ldecod ' + cmd.format(in_file, output, ref_file)
         self.wait_proc(cmd)
         return output
 
