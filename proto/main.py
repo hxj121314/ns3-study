@@ -12,15 +12,15 @@ def test_comp():
 
     enc = YUVEncode(yuv.get_output())
     ret_list = []
-    frm = 30
+    frm = 12
     for i in range(10, 40, 2):
-        ret = enc.jm_h264(yuv.get_source(), (1280, 720), rate=i * 100000, f_rate=30, frm=frm)
+        ret, base = enc.jm_h264(yuv.get_source(), (1280, 720), rate=i * 100000, f_rate=25, frm=frm)
         size = os.path.getsize(ret)
-        size *= 8.0 * (30.0 / frm) / 1000000
-        out = enc.jm_yuv(ret, yuv.get_source(), '123.yuv')
-        p, s = yuv.comp_yuv(out)
-        p2, s2 = yuv2.comp_yuv(out)
+        size *= 8.0 * (25.0 / frm) / 1000000
+        p, s = yuv.comp_yuv(base)
+        p2, s2 = yuv2.comp_yuv(base)
         ret_list.append(','.join([str(i) for i in (size, p, s, p2, s2)]) + '\n')
+        break
     with open(yuv.get_output() + '123.csv', 'w') as f:
         f.writelines(ret_list)
 

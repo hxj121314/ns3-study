@@ -40,6 +40,14 @@ class YUVEncode(object):
         self.wait_proc(cmd)
         return output
 
+    def ffmpeg_yuv(self, source, output='123.yuv'):
+        assert os.path.exists(source)
+        output = self._output + output
+        cmd = "ffmpeg -i {0} {1} -y"
+        cmd = cmd.format(source, output)
+        self.wait_proc(cmd)
+        return output
+
     def jm_yuv(self, in_file, ref_file, output):
         assert os.path.exists(in_file)
         assert os.path.exists(ref_file)
@@ -74,4 +82,4 @@ class YUVEncode(object):
             w, h, w, h, output, None, source, frm, gop, rate, f_rate, stats, rec, leak
         )
         self.wait_proc(cmd)
-        return output
+        return output,rec

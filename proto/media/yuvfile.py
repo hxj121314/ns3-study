@@ -13,19 +13,23 @@ class VmafComp(object):
         self._lib = self._root + '..' + os.sep + 'lib' + os.sep
 
     def comp(self, w, h, source, f1):
+        assert os.path.exists(source)
+        assert os.path.exists(f1)
         pass
 
     def comp_yuv(self, w, h, source, f1):
-        cmd = self._lib + "psnr yuv420p {2} {3} {0} {1} --out-fmt json"
-        cmd = cmd.format(w, h, f1, source)
+        assert os.path.exists(source)
+        assert os.path.exists(f1)
+        cmd = self._lib + "psnr yuv420p {2} {3} {0} {1}"
+        cmd = cmd.format(w, h, source, f1)
         ret = self._encoder.wait_proc(cmd)
         avg = []
         for i in ret:
             i = i.strip().split()[-1]
             avg.append(float(i))
         avg = np.mean(avg)
-        cmd = self._lib + "ssim yuv420p {2} {3} {0} {1} --out-fmt json"
-        cmd = cmd.format(w, h, f1, source)
+        cmd = self._lib + "ssim yuv420p {2} {3} {0} {1}"
+        cmd = cmd.format(w, h, source, f1)
         ret = self._encoder.wait_proc(cmd)
         avg2 = []
         for i in ret:
@@ -41,16 +45,20 @@ class FFComp(object):
         self._encoder = enc
 
     def comp(self, w, h, source, f1):
+        assert os.path.exists(source)
+        assert os.path.exists(f1)
         cmd = "ffmpeg -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
               " -filter_complex \"ssim='stats_file={2}_ssim.log';[0:v][1:v]psnr='stats_file={2}_psnr.log'\" -f null -"
-        cmd = cmd.format(w, h, f1, source)
+        cmd = cmd.format(w, h, source, f1)
         self._encoder.wait_proc(cmd)
         return self.read_log(f1)
 
     def comp_yuv(self, w, h, source, f1):
+        assert os.path.exists(source)
+        assert os.path.exists(f1)
         cmd = "ffmpeg -pix_fmt yuv420p -s {0}x{1} -i {2} -pix_fmt yuv420p -s {0}x{1} -i {3}" + \
               " -filter_complex \"ssim='stats_file={2}_ssim.log';[0:v][1:v]psnr='stats_file={2}_psnr.log'\" -f null -"
-        cmd = cmd.format(w, h, f1, source)
+        cmd = cmd.format(w, h, source, f1)
         self._encoder.wait_proc(cmd)
         return self.read_log(f1)
 
@@ -107,17 +115,21 @@ class YUVUtil(object):
     def yuv_ffmpeg_h264(self, output='sp.264'):
         return self._encoder.ffmpeg_h264(self._source, self._size, output)
 
-    def comp(self, f1='sp.mp4'):
+    def comp(self, f1='sp.mp4', in_file=None):
+        if in_file is None:
+            in_file = self._source
         if not os.path.exists(f1):
             f1 = self._output + f1
-        return self._comp.comp(self._w, self._h, self._source, f1)
+        return self._comp.comp(self._w, self._h, in_file, f1)
 
-    def comp_yuv(self, f1=None):
+    def comp_yuv(self, f1=None, in_file=None):
+        if in_file is None:
+            in_file = self._source
         if f1 is None:
             f1 = self._source
         if not os.path.exists(f1):
             f1 = self._output + f1
-        return self._comp.comp_yuv(self._w, self._h, self._source, f1)
+        return self._comp.comp_yuv(self._w, self._h, in_file, f1)
 
     def rgb2img(self, (r, g, b)):
         im_r = Image.frombytes('L', self._size, r.tostring())
