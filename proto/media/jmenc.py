@@ -83,5 +83,5 @@ class YUVEncode(object):
         cmd = self._lib + 'lencod ' + cmd.format(
             w, h, w, h, output, None, source, frm, gop, rate, f_rate, stats, rec, leak
         )
-        self.wait_proc(cmd)
+        self.wait_proc(cmd, log=True)
         return output, rec
